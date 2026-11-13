@@ -23,7 +23,7 @@ const CONFIG = {
   // URL de Google Apps Script (termina en /exec) para existencias y registro
   // de pedidos. Vacía ("") = no se usa la hoja: todo se ve disponible y el
   // pedido se envía solo por WhatsApp.
-  urlPedidos: "",
+  urlPedidos: "https://script.google.com/macros/s/AKfycbwtX8F5pieMSEPBklOCMytOTcMh7DI4kqksKRIQuCIRjYIhVtiw8bmgQ3T_-QTXGY5weA/exec",
 
   // Entrega. Opciones del formulario: "Recoger en el salón" (gratis)
   // o "Entrega a domicilio" (costo calculado con el mapa).
