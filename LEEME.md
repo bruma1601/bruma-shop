@@ -104,6 +104,22 @@ Con los valores actuales, cada km en línea recta cuesta unos ₡250. Por ejempl
 - Si sale en **km/L**, ese número se usa directo en la tabla.
 - Si sale en **L/100 km**, haga 100 ÷ ese número para pasarlo a km/L. Ejemplo: 8,3 L/100 km → 100 ÷ 8,3 ≈ 12 km/L.
 
+### Alérgenos
+
+Cada producto en `PRODUCTOS` tiene tres datos de alérgenos. Se muestran en una caja "Alérgenos" de la ventana de detalle:
+
+```js
+alergenos: ["trigo (gluten)", "huevo", "leche", "nueces", "soya"],   // lo que CONTIENE
+trazas: [],                                                         // lo que PUEDE CONTENER
+contieneGelatina: true                                              // malvaviscos con gelatina
+```
+
+- `alergenos`: lo que el producto **contiene**. Se escribe cada cosa entre comillas, separada por comas. Si la lista incluye `"nueces"` (escrito así, en minúscula), la tarjeta muestra la línea "Contiene nueces".
+- `trazas`: lo que **puede contener** porque todo se prepara en la misma cocina. Sale como "Puede contener trazas de: …". Si se deja vacío (`[]`), esa línea no aparece.
+- `contieneGelatina`: `true` muestra "Las bombas de chocolate llevan malvaviscos con gelatina". `false` la oculta.
+
+Revise siempre estas listas contra las etiquetas de los ingredientes que compre. El aviso general del pie de página está en `index.html`, en `pie__alergenos`.
+
 ### Noah, la perrita mascota
 
 Noah aparece al confirmar un pedido y cuando alguien toca el logo. Si tocan el logo 5 veces seguidas, sale un mensaje secreto.

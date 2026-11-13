@@ -98,6 +98,10 @@ const CONFIG = {
    - sabores:     lista fija de { nombre, cantidad }. El cliente no los elige.
    - foto:        ruta de la imagen (ej.: "img/bolsita.jpg"). "" = "Foto próximamente".
    - regalo:      true = insignia verde "Opción de regalo" y estilo especial.
+   - alergenos:   lista de lo que CONTIENE. Se muestra en el detalle; si incluye
+                  "nueces", la tarjeta dice "Contiene nueces".
+   - trazas:      lista de lo que PUEDE CONTENER (misma cocina). [] = no se muestra.
+   - contieneGelatina: true = avisa que los malvaviscos llevan gelatina.
    ========================================================= */
 const PRODUCTOS = [
   {
@@ -112,7 +116,11 @@ const PRODUCTOS = [
       { nombre: "Bombas de chocolate", cantidad: 5 }
     ],
     foto: "",              // ej.: "img/bolsita.jpg"
-    regalo: false
+    regalo: false,
+    // Revisar contra las etiquetas de los ingredientes
+    alergenos: ["leche", "soya"],
+    trazas: ["trigo", "huevo", "nueces"],
+    contieneGelatina: true   // malvaviscos
   },
   {
     id: "cajita",
@@ -127,7 +135,11 @@ const PRODUCTOS = [
       { nombre: "Bombas de chocolate", cantidad: 2 }
     ],
     foto: "",              // ej.: "img/cajita.jpg"
-    regalo: false
+    regalo: false,
+    // Revisar contra las etiquetas de los ingredientes
+    alergenos: ["trigo (gluten)", "huevo", "leche", "nueces", "soya"],
+    trazas: [],
+    contieneGelatina: true   // malvaviscos
   },
   {
     id: "latita",
@@ -142,7 +154,11 @@ const PRODUCTOS = [
       { nombre: "Bombas de chocolate", cantidad: 4 }
     ],
     foto: "",              // ej.: "img/latita.jpg"
-    regalo: true
+    regalo: true,
+    // Revisar contra las etiquetas de los ingredientes
+    alergenos: ["trigo (gluten)", "huevo", "leche", "nueces", "soya"],
+    trazas: [],
+    contieneGelatina: true   // malvaviscos
   }
 ];
 
@@ -542,11 +558,34 @@ function htmlTarjeta(p) {
           <span class="cantidad-galletas">${escapar(textoContenido(p))}</span>
         </div>
         <ul class="sabores" aria-label="Sabores">${sabores}</ul>
+        ${(p.alergenos || []).includes("nueces") ? `<p class="tarjeta__aviso">Contiene nueces</p>` : ""}
       </div>
       <div class="tarjeta__accion" data-control="${p.id}" data-clave="tarjeta-${p.id}">
         ${htmlControl(p.id, `tarjeta-${p.id}`)}
       </div>
     </article>`;
+}
+
+/** "a, b, c" con cada palabra en negrita. */
+function listaNegrita(lista) {
+  return lista.map((x) => `<strong>${escapar(x)}</strong>`).join(", ");
+}
+
+/** Caja "Alérgenos" del detalle (vacía si el producto no tiene datos). */
+function htmlAlergenos(p) {
+  const contiene = p.alergenos || [];
+  const trazas = p.trazas || [];
+  if (!contiene.length && !trazas.length && !p.contieneGelatina) return "";
+  return `
+    <section class="alergenos" aria-labelledby="alergenos-titulo">
+      <h3 class="alergenos__titulo" id="alergenos-titulo">
+        <svg class="alergenos__icono" aria-hidden="true"><use href="#i-alerta"/></svg>
+        Alérgenos
+      </h3>
+      ${contiene.length ? `<p>Contiene: ${listaNegrita(contiene)}.</p>` : ""}
+      ${trazas.length ? `<p>Puede contener trazas de: ${listaNegrita(trazas)}.</p>` : ""}
+      ${p.contieneGelatina ? `<p>Las bombas de chocolate llevan malvaviscos con gelatina.</p>` : ""}
+    </section>`;
 }
 
 function htmlDetalle(p) {
@@ -568,6 +607,7 @@ function htmlDetalle(p) {
         <p class="detalle__desc">${escapar(p.descripcion)}</p>
         <h3 class="detalle__subtitulo">Sabores incluidos</h3>
         <ul class="lista-sabores">${sabores}</ul>
+        ${htmlAlergenos(p)}
         <div class="detalle__accion" data-control="${p.id}" data-clave="detalle">
           ${htmlControl(p.id, "detalle")}
         </div>
@@ -822,7 +862,7 @@ function htmlPasoDatos() {
       <div class="campo">
         <label for="f-notas">Notas <span class="opcional">(opcional)</span></label>
         <textarea id="f-notas" name="notas" rows="2" maxlength="300"
-          placeholder="Ej.: es para regalo, sin nueces…">${escapar(datos.notas)}</textarea>
+          placeholder="Ej.: es para regalo, alergia a las nueces, etc.">${escapar(datos.notas)}</textarea>
       </div>
 
       <p class="privacidad">Usamos tus datos solo para preparar y entregar tu pedido.</p>
