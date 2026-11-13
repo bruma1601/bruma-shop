@@ -27,6 +27,15 @@ const CONFIG = {
 
   // Entrega. Opciones del formulario: "Recoger en el salón" (gratis)
   // o "Entrega a domicilio" (costo calculado con el mapa).
+  //
+  // Cómo se calcula el costo de entrega a domicilio:
+  //   km de viaje = línea recta × factorCalle
+  //   costo = km de viaje × costoPorKm × (idaYVuelta ? 2 : 1)
+  //         + (km de viaje ÷ velocidadPromedio) × valorHora
+  //   Luego se aplica el mínimo y se redondea hacia arriba.
+  //
+  // Si el consumo real del carro es otro, cambiar costoPorKm así:
+  //   Consumo real → costoPorKm: 10 km/L → 120 · 12 km/L → 100 · 14 km/L → 85 · 16 km/L → 75
   entrega: {
     // Dirección del salón de uñas, para quien elige recogerlo. Se muestra debajo de
     // "Recoger en el salón" y en el resumen. Vacío ("") = no se muestra.
@@ -41,14 +50,14 @@ const CONFIG = {
     ],
     // Dónde empieza el mapa antes de que la persona marque su casa
     centroMapa: { lat: 9.8467, lng: -84.3131, zoom: 15 },   // Santiago de Puriscal (centro)
-    factorCalle: 1.4,          // la ruta real es ~40 % más larga que la línea recta
-    costoPorKm: 100,           // ₡ de gasolina + desgaste, por km recorrido
-    idaYVuelta: true,          // cobrar los km de ida y de regreso
-    velocidadPromedio: 25,     // km/h en ciudad
-    valorHora: 2000,           // ₡ por hora de manejo (solo el tiempo de ida)
+    factorCalle: 1.5,          // carreteras de montaña: la ruta real es ~50 % más larga que la línea recta
+    costoPorKm: 100,           // (precio del litro ₡806 ÷ 12 km/L del Suzuki Vitara) × 1,5 de desgaste
+    idaYVuelta: false,         // un solo día de entregas en ruta: el regreso se reparte entre todos los pedidos
+    velocidadPromedio: 30,     // km/h promedio en las rutas de Puriscal
+    valorHora: 2000,           // ₡ por hora de manejo
     minimo: 1500,              // costo mínimo de entrega
     redondeo: 500,             // redondear hacia arriba a múltiplos de esto
-    distanciaMaximaKm: 20,     // más lejos: "Te confirmamos el costo por WhatsApp"
+    distanciaMaximaKm: 30,     // km DE VIAJE (no en línea recta); 30 ≈ 20 km en línea recta. Más lejos: "por confirmar"
     diaEntrega: "",            // ej. "sábado 20 de diciembre"; vacío = "Te avisamos el día de entrega"
     entregaGratisDesde: null   // ej. 25000 (₡ en productos); null = no aplica
   },
