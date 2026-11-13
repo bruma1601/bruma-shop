@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="es-CR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- El título se completa con CONFIG.nombreTienda (app.js) -->
+  <title>Bruma · Galletas navideñas hechas en casa</title>
+  <meta name="format-detection" content="telephone=no">
+  <meta name="description" content="Galletas navideñas hechas en casa en Costa Rica. Elige tu presentación y encárgalas.">
+  <meta name="theme-color" content="#D82E30">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Nunito:wght@400;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Íconos SVG reutilizables -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-bolsa" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8L5 8z"/>
+        <path d="M9 10V7a3 3 0 0 1 6 0v3"/>
+      </g>
+    </symbol>
+    <symbol id="i-galleta" viewBox="0 0 48 48">
+      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="2.5"/>
+      <circle cx="17" cy="17" r="2.6" fill="currentColor"/>
+      <circle cx="29" cy="15" r="2.2" fill="currentColor"/>
+      <circle cx="31" cy="27" r="2.8" fill="currentColor"/>
+      <circle cx="19" cy="30" r="2.4" fill="currentColor"/>
+      <circle cx="25" cy="23" r="1.6" fill="currentColor"/>
+    </symbol>
+    <symbol id="i-taza" viewBox="0 0 48 48">
+      <g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 18h26v10a12 12 0 0 1-12 12h-2A12 12 0 0 1 8 28V18z"/>
+        <path d="M34 21h3a5 5 0 0 1 0 10h-3"/>
+        <path d="M16 7c-2 3 2 4 0 7M23 6c-2 3 2 4 0 7"/>
+      </g>
+    </symbol>
+    <symbol id="i-huella" viewBox="0 0 24 24">
+      <g fill="currentColor">
+        <ellipse cx="12" cy="16.5" rx="5" ry="4.2"/>
+        <ellipse cx="5.2" cy="10.5" rx="2.1" ry="2.7"/>
+        <ellipse cx="9.3" cy="6.3" rx="2.1" ry="2.8"/>
+        <ellipse cx="14.7" cy="6.3" rx="2.1" ry="2.8"/>
+        <ellipse cx="18.8" cy="10.5" rx="2.1" ry="2.7"/>
+      </g>
+    </symbol>
+    <symbol id="i-arbol" viewBox="0 0 24 24">
+      <path fill="#0DA35E" d="M12 3l4 5h-2l4 5h-2.5l4 5H4.5l4-5H6l4-5H8z"/>
+      <rect x="10.5" y="18" width="3" height="3.5" fill="#9F0216"/>
+      <path fill="#F2C14E" d="M12 0.8l.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L9.1 2.9l2-.3z"/>
+    </symbol>
+    <symbol id="i-estrella" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 1.5l2.6 6.5 6.9.5-5.3 4.5 1.7 6.8L12 16.1l-5.9 3.7 1.7-6.8L2.5 8.5l6.9-.5z"/>
+    </symbol>
+    <symbol id="i-atras" viewBox="0 0 24 24">
+      <path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-whatsapp" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.5-.3z"/>
+    </symbol>
+    <symbol id="i-cerrar" viewBox="0 0 24 24">
+      <path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-basura" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>
+      </g>
+    </symbol>
+    <symbol id="i-regalo" viewBox="0 0 24 24">
+      <g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="8" width="18" height="4" rx="1"/>
+        <path d="M5 12v8h14v-8M12 8v12M12 8c-1.5-3-5-3.5-5-1s5 1 5 1zm0 0c1.5-3 5-3.5 5-1s-5 1-5 1z"/>
+      </g>
+    </symbol>
+  </svg>
+
+  <a class="saltar" href="#presentaciones">Ver nuestros productos</a>
+
+  <!-- ===================== ENCABEZADO ===================== -->
+  <header class="hero">
+    <!-- Animación de fondo (LottieFiles). Se configura en app.js → CONFIG.animacionFondo -->
+    <div class="hero__deco" aria-hidden="true">
+      <canvas class="hero__lottie" id="lottie-fondo"></canvas>
+    </div>
+
+    <div class="hero__barra">
+      <!-- Logo de la tienda (img/logo.png) -->
+      <!-- El logo es un botón: al tocarlo aparece Noah (sorpresa) -->
+      <button type="button" class="marca" id="logo-boton">
+        <img class="marca__logo" src="img/logo.png" alt="Bruma" width="446" height="206" data-logo>
+        <span class="visualmente-oculto">. Saluda a Noah</span>
+      </button>
+      <div class="hero__acciones">
+      <a class="enlace-pedido" href="#tu-pedido">Tu pedido</a>
+      <button type="button" class="btn-carrito" id="abrir-carrito" aria-haspopup="dialog" aria-controls="carrito">
+        <svg aria-hidden="true"><use href="#i-bolsa"/></svg>
+        <span class="visualmente-oculto">Abrir carrito,</span>
+        <span class="btn-carrito__contador" id="contador-carrito">0</span>
+        <span class="visualmente-oculto" id="contador-texto">unidades</span>
+      </button>
+      </div>
+    </div>
+
+    <div class="hero__contenido">
+      <h1 class="hero__titulo">
+        <span class="hero__linea">Encarga tus galletas</span>
+        <span class="hero__script">navideñas</span>
+      </h1>
+      <p class="hero__frase">Hechas en casa, horneadas por encargo.</p>
+      <a class="btn btn--blanco" href="#presentaciones">Ver presentaciones</a>
+    </div>
+  </header>
+
+  <!-- ===================== PRESENTACIONES ===================== -->
+  <main>
+    <section class="presentaciones" id="presentaciones" aria-labelledby="titulo-presentaciones" tabindex="-1">
+      <div class="seccion__encabezado">
+        <h2 id="titulo-presentaciones">Elige tu presentación</h2>
+        <p>Toca una presentación para ver los detalles.</p>
+      </div>
+      <!-- Las tarjetas se generan desde PRODUCTOS en app.js -->
+      <div class="tarjetas" id="tarjetas"></div>
+    </section>
+
+    <!-- ===================== TU PEDIDO (carrito grande) ===================== -->
+    <section class="pedido" id="tu-pedido" aria-labelledby="titulo-pedido" tabindex="-1">
+      <div class="pedido__bloque">
+        <h2 class="pedido__titulo" id="titulo-pedido" tabindex="-1">Tu pedido</h2>
+        <!-- Lo pinta app.js con la misma plantilla que el panel del carrito -->
+        <div class="pedido__contenido carrito" id="pedido-contenido"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Aviso al agregar desde una tarjeta -->
+  <div class="toast" id="toast" role="status" hidden>
+    <span>Agregado a tu pedido</span>
+    <a href="#tu-pedido">Ver pedido</a>
+  </div>
+
+  <!-- Noah, la perrita mascota (sorpresa). Un solo elemento que se reutiliza. -->
+  <div class="noah" id="noah" hidden>
+    <div class="noah__burbuja" aria-hidden="true"><p class="noah__texto" id="noah-texto"></p></div>
+    <button type="button" class="noah__perrita" aria-label="Cerrar el mensaje de Noah">
+      <picture>
+        <source srcset="img/noah.webp" type="image/webp">
+        <img src="img/noah.png" alt="Noah, la perrita mascota" width="640" height="594" loading="lazy">
+      </picture>
+    </button>
+  </div>
+  <p class="visualmente-oculto" id="noah-aviso" aria-live="polite"></p>
+
+  <!-- Barra fija en celular cuando "Tu pedido" no está a la vista -->
+  <a class="barra-pedido" id="barra-pedido" href="#tu-pedido" hidden>
+    <svg aria-hidden="true"><use href="#i-bolsa"/></svg>
+    <span class="barra-pedido__texto" id="barra-texto"></span>
+  </a>
+
+  <!-- ===================== PIE DE PÁGINA ===================== -->
+  <footer class="pie">
+    <p class="pie__marca"><img class="pie__logo" src="img/logo.png" alt="Bruma" width="446" height="206" loading="lazy" data-logo></p>
+    <p class="pie__frase">Galletas navideñas hechas en casa</p>
+    <!-- WhatsApp y condiciones se toman de CONFIG en app.js -->
+    <ul class="pie__redes">
+      <li><a id="pie-whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a></li>
+    </ul>
+    <p class="pie__condiciones" id="pie-condiciones"></p>
+  </footer>
+
+  <!-- ===================== DETALLE DE PRODUCTO ===================== -->
+  <dialog class="hoja hoja--detalle" id="detalle" aria-labelledby="detalle-nombre">
+    <div class="hoja__cuerpo" id="detalle-contenido"></div>
+  </dialog>
+
+  <!-- ===================== CARRITO ===================== -->
+  <dialog class="hoja hoja--carrito" id="carrito" aria-labelledby="carrito-titulo">
+    <div class="hoja__cuerpo carrito">
+      <div class="carrito__cabecera">
+        <button type="button" class="btn-icono" id="carrito-atras" aria-label="Volver al paso anterior" hidden>
+          <svg aria-hidden="true"><use href="#i-atras"/></svg>
+        </button>
+        <h2 id="carrito-titulo" tabindex="-1">Tu carrito</h2>
+        <button type="button" class="btn-icono" data-cerrar aria-label="Cerrar carrito">
+          <svg aria-hidden="true"><use href="#i-cerrar"/></svg>
+        </button>
+      </div>
+      <!-- El contenido de cada paso (carrito, datos, resumen, final) lo pinta app.js -->
+      <div class="carrito__contenido" id="carrito-contenido"></div>
+      <div class="carrito__pie" id="carrito-pie"></div>
+      <!-- Aviso de Noah para lectores de pantalla mientras el panel está abierto -->
+      <p class="visualmente-oculto" id="noah-aviso-panel" aria-live="polite"></p>
+    </div>
+  </dialog>
+
+  <!-- Avisos para lectores de pantalla -->
+  <p class="visualmente-oculto" id="aviso" aria-live="polite"></p>
+
+  <script src="app.js"></script>
+</body>
+</html>
