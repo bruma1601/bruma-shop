@@ -98,7 +98,7 @@ Con la URL puesta, la página espera esto del Apps Script:
 
 - **GET** a la URL responde las existencias:
   `{"ok": true, "quedan": {"bolsita": 5, "cajita": 0, "latita": 12}}`
-- **POST** a la URL (texto JSON) registra el pedido con estos campos: `pedido`, `nombre`, `telefono`, `entrega` (`salón`, `casa` o `domicilio`), `costoEntrega`, `senas`, `enlaceMapa`, `productos`, `total`, `adelanto`, `notas` e `items` (por ejemplo `{"bolsita": 2}`). Responde una de estas dos:
+- **POST** a la URL (texto JSON) registra el pedido con estos campos: `pedido`, `nombre`, `telefono`, `entrega` (`salón` o `domicilio`), `costoEntrega`, `senas`, `enlaceMapa`, `productos`, `total`, `adelanto`, `notas` e `items` (por ejemplo `{"bolsita": 2}`). Responde una de estas dos:
   - `{"ok": true}` si se registró.
   - `{"ok": false, "agotados": ["cajita"]}` si algo se agotó.
 

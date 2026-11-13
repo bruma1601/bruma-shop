@@ -40,7 +40,7 @@ const CONFIG = {
       { nombre: "Salón", lat: 0, lng: 0 }      // EJEMPLO: pegar coordenadas reales del salón
     ],
     // Dónde empieza el mapa antes de que la persona marque su casa
-    centroMapa: { lat: 9.8471, lng: -84.3143, zoom: 13 },   // Santiago de Puriscal
+    centroMapa: { lat: 9.8467, lng: -84.3131, zoom: 15 },   // Santiago de Puriscal (centro)
     factorCalle: 1.4,          // la ruta real es ~40 % más larga que la línea recta
     costoPorKm: 100,           // ₡ de gasolina + desgaste, por km recorrido
     idaYVuelta: true,          // cobrar los km de ida y de regreso
