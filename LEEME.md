@@ -127,6 +127,8 @@ Las imágenes son `img/noah.webp` y `img/noah.png` (con fondo transparente).
 
 Si `urlPedidos` está vacío, todo se ve disponible y el pedido se envía solo por WhatsApp.
 
+**Cómo armar la hoja y pegar el programa:** vea [apps-script/LEEME.md](apps-script/LEEME.md). El código está en [apps-script/Codigo.gs](apps-script/Codigo.gs).
+
 Con la URL puesta, la página espera esto del Apps Script:
 
 - **GET** a la URL responde las existencias:
