@@ -20,7 +20,8 @@ Todo está al **inicio del archivo `app.js`**. Ábralo con el Bloc de notas o VS
 | WhatsApp que recibe pedidos | `whatsapp` | `"50686485190"` (con 506, sin + ni espacios) |
 | SINPE Móvil | `sinpe` | `{ numero: "8648-5190", nombre: "María Pérez" }` |
 | Porcentaje de adelanto | `porcentajeAdelanto` | `50` |
-| Último día de pedidos | `fechaLimitePedidos` | `"15 de diciembre"` |
+| Último día de pedidos | `fechaLimitePedidos` | `"15 de diciembre"` (por ahora no se muestra en la página) |
+| Condiciones del pedido | `condiciones` | ver la sección "Condiciones" |
 | Hoja de Google | `urlPedidos` | `"https://script.google.com/macros/s/.../exec"` |
 
 ### Precios
@@ -103,6 +104,34 @@ Con los valores actuales, cada km en línea recta cuesta unos ₡250. Por ejempl
 
 - Si sale en **km/L**, ese número se usa directo en la tabla.
 - Si sale en **L/100 km**, haga 100 ÷ ese número para pasarlo a km/L. Ejemplo: 8,3 L/100 km → 100 ÷ 8,3 ≈ 12 km/L.
+
+### Condiciones
+
+Las condiciones del pedido se arman solas a partir de `CONFIG.condiciones`. Aparecen en tres lugares:
+
+- En la ventana que se abre con "Condiciones del pedido", en el pie de página.
+- En la casilla que hay que marcar antes de "Confirmar pedido".
+- En los avisos del resumen y de la pantalla final.
+
+```js
+condiciones: {
+  horasParaPagar: 24,
+  adelantoReembolsable: false,
+  diasParaRecoger: 3,
+  saldoFormas: "efectivo o SINPE Móvil",
+  extra: []
+}
+```
+
+- `horasParaPagar`: cuántas horas tiene la persona para enviar el adelanto antes de que el pedido se cancele. Sale en las condiciones y en la pantalla final ("Tienes 24 horas…").
+- `adelantoReembolsable`:
+  - `false`: las condiciones explican que el adelanto no se devuelve, el resumen muestra "El adelanto no es reembolsable." y la casilla dice "Entiendo que el adelanto no es reembolsable y acepto las condiciones del pedido".
+  - `true`: esos avisos desaparecen y la casilla dice solo "Acepto las condiciones del pedido".
+- `diasParaRecoger`: después de cuántos días un pedido no recogido ya no se reembolsa.
+- `saldoFormas`: cómo se paga el resto. Se lee así: "El resto se paga al recoger o al recibir, en ___."
+- `extra`: líneas adicionales al final de las condiciones, cada una entre comillas y separadas por comas. Ejemplo: `extra: ["Los precios incluyen el empaque.", "No hacemos envíos fuera de Puriscal."]`.
+
+El porcentaje del adelanto sale de `porcentajeAdelanto`. Si se quiere cambiar la redacción de alguna línea, está en la función `textoCondiciones()` de `app.js`.
 
 ### Alérgenos
 

@@ -174,13 +174,21 @@
     <ul class="pie__redes">
       <li><a id="pie-whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a></li>
     </ul>
-    <p class="pie__condiciones" id="pie-condiciones"></p>
+    <p class="pie__condiciones" id="pie-condiciones">
+      <button type="button" class="pie__enlace" data-accion="ver-condiciones" aria-haspopup="dialog">Condiciones del pedido</button>
+    </p>
     <p class="pie__alergenos">Todas nuestras galletas se preparan en una cocina donde se usan trigo, huevo, leche, nueces y soya. Si tienes alguna alergia, escríbenos antes de pedir.</p>
   </footer>
 
   <!-- ===================== DETALLE DE PRODUCTO ===================== -->
   <dialog class="hoja hoja--detalle" id="detalle" aria-labelledby="detalle-nombre">
     <div class="hoja__cuerpo" id="detalle-contenido"></div>
+  </dialog>
+
+  <!-- ===================== CONDICIONES DEL PEDIDO ===================== -->
+  <!-- El texto lo arma app.js desde CONFIG.condiciones -->
+  <dialog class="hoja hoja--detalle hoja--condiciones" id="condiciones" aria-labelledby="condiciones-titulo">
+    <div class="hoja__cuerpo" id="condiciones-contenido"></div>
   </dialog>
 
   <!-- ===================== CARRITO ===================== -->

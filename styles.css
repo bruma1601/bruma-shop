@@ -606,6 +606,75 @@ p { margin: 0; }
 .alergenos p { margin: 4px 0 0; }
 .alergenos strong { font-weight: 800; }
 
+/* Condiciones del pedido (ventana) */
+.condiciones { padding: 12px var(--gutter) calc(24px + env(safe-area-inset-bottom)); }
+.condiciones__titulo {
+  margin: 18px 0 12px;
+  padding-right: 52px;           /* espacio para la X */
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+.condiciones__lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0 0 0 20px;
+  line-height: 1.5;
+}
+.condiciones__lista li::marker { color: var(--rojo); }
+
+/* Botón con aspecto de enlace (abre las condiciones) */
+.btn-enlace {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: 800;
+  color: var(--rojo-oscuro);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Casilla "acepto las condiciones" */
+.aceptar { display: flex; flex-direction: column; gap: 6px; }
+.aceptar__label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 2px solid #E3D2BC;
+  border-radius: 14px;
+  background: var(--blanco);
+  font-size: .95rem;
+  line-height: 1.4;
+  cursor: pointer;
+}
+.aceptar__label input {
+  flex: none;
+  width: 22px; height: 22px;
+  margin: 0;
+  accent-color: var(--verde-boton);
+}
+.aceptar--error .aceptar__label { border-color: var(--rojo-oscuro); background: #FDECEC; }
+
+/* Línea destacada: adelanto no reembolsable / plazo para pagar */
+.aviso-reembolso {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 4px solid var(--rojo-oscuro);
+  border-radius: 10px;
+  background: #FDECEC;
+  color: var(--rojo-oscuro);
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: left;
+}
+
 /* Aviso discreto en la tarjeta */
 .tarjeta__aviso {
   margin: 0;
@@ -1002,6 +1071,18 @@ p { margin: 0; }
   font-size: .92rem;
   line-height: 1.5;
 }
+.pie__enlace {
+  padding: 8px 4px;
+  border: 0;
+  background: none;
+  color: var(--blanco);
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.pie__enlace:focus-visible { outline: 2px solid var(--blanco); outline-offset: 2px; }
 .pie__alergenos {
   max-width: 46ch;
   margin: 16px auto 0;
@@ -1475,6 +1556,8 @@ body.con-barra .noah--flotante { bottom: calc(84px + env(safe-area-inset-bottom)
     box-shadow: var(--sombra-alta);
   }
   .hoja--detalle .hoja__cuerpo { max-height: 88vh; }
+  .hoja--condiciones { width: min(620px, calc(100% - 48px)); }
+  .condiciones { padding: 24px 28px 28px; }
   .hoja--detalle .hoja__cuerpo::before { display: none; }
   .detalle {
     display: grid;

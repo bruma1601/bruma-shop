@@ -17,6 +17,16 @@ const CONFIG = {
   // Porcentaje que se paga por adelantado para apartar el pedido.
   porcentajeAdelanto: 50,
 
+  // Condiciones del pedido. Se muestran en la ventana "Condiciones del pedido"
+  // (pie de página y paso "Revisa tu pedido"). El texto se arma solo con estos datos.
+  condiciones: {
+    horasParaPagar: 24,          // si no llega el adelanto en este tiempo, el pedido se cancela
+    adelantoReembolsable: false, // false: las masas se preparan y congelan con anticipación
+    diasParaRecoger: 3,          // pedidos no recogidos en estos días no se reembolsan
+    saldoFormas: "efectivo o SINPE Móvil",   // cómo se paga el resto
+    extra: []                    // líneas adicionales, ej.: ["Los precios incluyen el empaque."]
+  },
+
   // Último día para hacer pedidos (texto libre, aparece en el pie de página).
   fechaLimitePedidos: "15 de diciembre",           // EJEMPLO: cambiar
 
@@ -615,6 +625,71 @@ function htmlDetalle(p) {
     </div>`;
 }
 
+/* ---------- Condiciones del pedido ---------- */
+
+/** Lista de condiciones (texto plano), armada desde CONFIG.condiciones. */
+function textoCondiciones() {
+  const c = CONFIG.condiciones;
+  const lineas = [
+    `Tu pedido queda apartado cuando recibimos el adelanto del ${CONFIG.porcentajeAdelanto} % por SINPE Móvil. ` +
+      `Si no lo recibimos en ${c.horasParaPagar} horas, el pedido se cancela.`
+  ];
+  if (!c.adelantoReembolsable) {
+    lineas.push("El adelanto no es reembolsable: preparamos y congelamos las masas con anticipación para cada pedido. " +
+      "Si cancelas, no se cobra el resto.");
+  }
+  lineas.push(
+    `El resto se paga al recoger o al recibir, en ${c.saldoFormas}.`,
+    "Si nosotros no podemos cumplir con tu pedido, te devolvemos el 100 % de lo pagado.",
+    "Entrega a domicilio: el costo es un estimado y lo confirmamos por WhatsApp. Si no hay quien reciba, " +
+      "coordinamos por WhatsApp; una segunda visita tiene costo adicional.",
+    `Recoger: coordinamos el horario por WhatsApp. Los pedidos no recogidos en ${c.diasParaRecoger} días no se reembolsan.`,
+    ...(c.extra || []).filter((x) => String(x).trim())
+  );
+  return lineas;
+}
+
+function htmlCondiciones() {
+  const items = textoCondiciones().map((t) => `<li>${escapar(t)}</li>`).join("");
+  return `
+    <div class="condiciones">
+      <button type="button" class="btn-icono detalle__cerrar" data-cerrar aria-label="Cerrar condiciones">
+        <svg aria-hidden="true"><use href="#i-cerrar"/></svg>
+      </button>
+      <h2 class="condiciones__titulo" id="condiciones-titulo">Condiciones del pedido</h2>
+      <ul class="condiciones__lista">${items}</ul>
+    </div>`;
+}
+
+const dlgCondiciones = $("#condiciones");
+function abrirCondiciones(origen) {
+  $("#condiciones-contenido").innerHTML = htmlCondiciones();
+  abrirDialogo(dlgCondiciones, origen);
+  $("#condiciones-contenido").scrollTop = 0;
+}
+
+/** La persona marcó "acepto las condiciones" en el paso de resumen. */
+let aceptaCondiciones = false;
+let errorCondiciones = false;
+
+function htmlAceptarCondiciones() {
+  const enlace = `<button type="button" class="btn-enlace" data-accion="ver-condiciones">condiciones del pedido</button>`;
+  const texto = CONFIG.condiciones.adelantoReembolsable
+    ? `Acepto las ${enlace}`
+    : `Entiendo que el adelanto no es reembolsable y acepto las ${enlace}`;
+  return `
+    <div class="aceptar${errorCondiciones ? " aceptar--error" : ""}">
+      <label class="aceptar__label">
+        <input type="checkbox" id="acepta-condiciones" ${aceptaCondiciones ? "checked" : ""} required
+          ${errorCondiciones ? `aria-invalid="true" aria-describedby="error-condiciones"` : ""}>
+        <span>${texto}</span>
+      </label>
+      ${errorCondiciones
+        ? `<p class="campo__error" id="error-condiciones">Marca la casilla para aceptar las condiciones y confirmar tu pedido.</p>`
+        : ""}
+    </div>`;
+}
+
 function htmlSinpe(adelanto) {
   const monto = adelanto == null
     ? `<p class="sinpe__monto">El monto del adelanto te lo confirmamos por WhatsApp.</p>`
@@ -937,6 +1012,7 @@ function htmlPasoResumen() {
       ${montos}
 
       ${htmlSinpe(adelanto)}
+      ${CONFIG.condiciones.adelantoReembolsable ? "" : `<p class="aviso-reembolso">El adelanto no es reembolsable.</p>`}
 
       <div class="resumen__datos">
         <div class="resumen__cabeza">
@@ -959,6 +1035,7 @@ function htmlPasoResumen() {
 
 function htmlPieResumen() {
   return `
+    ${htmlAceptarCondiciones()}
     <p class="estado" id="estado-confirmar" aria-live="polite"></p>
     <button type="button" class="btn btn--pedido" data-accion="confirmar">Confirmar pedido</button>`;
 }
@@ -985,6 +1062,7 @@ function htmlPasoFinal() {
       <p class="final__adelanto">${f.adelanto == null
         ? "El adelanto te lo confirmamos por WhatsApp."
         : `Adelanto a pagar: <strong>${formatoColones(f.adelanto)}</strong>`}</p>
+      <p class="aviso-reembolso">Tienes ${CONFIG.condiciones.horasParaPagar} horas para enviar el adelanto por SINPE. Si no, el pedido se cancela.</p>
 
       ${htmlSinpe(f.adelanto)}
 
@@ -1036,6 +1114,9 @@ function construirMensaje(numero, d, calc) {
   if (d.notas.trim()) lineas.push(`Notas: ${d.notas.trim()}`);
   lineas.push("");
   lineas.push("Te envío el comprobante del SINPE por aquí.");
+  lineas.push(CONFIG.condiciones.adelantoReembolsable
+    ? "Acepto las condiciones del pedido."
+    : "Acepto las condiciones del pedido (el adelanto no es reembolsable).");
   return lineas.join("\n");
 }
 
@@ -1157,6 +1238,8 @@ function vaciarYEmpezar() {
   avisoCarrito = "";
   datos = { ...datos, notas: "" };   // se recuerdan nombre, teléfono, entrega y señas
   errores = {};
+  aceptaCondiciones = false;          // cada pedido nuevo se acepta de nuevo
+  errorCondiciones = false;
   actualizarTodo();
   irAPaso("carrito");
   avisar("Carrito vacío. Puedes empezar un pedido nuevo.");
@@ -1271,7 +1354,7 @@ function bloquearScroll() {
   document.body.classList.add("bloqueado");
 }
 function desbloquearScroll() {
-  if (dlgDetalle.open || dlgCarrito.open) return;
+  if (dlgDetalle.open || dlgCarrito.open || dlgCondiciones.open) return;
   if (!document.body.classList.contains("bloqueado")) return;
   document.body.classList.remove("bloqueado");
   document.body.style.top = "";
@@ -1326,7 +1409,7 @@ function abrirCarrito(origen) {
   cargarExistencias();
 }
 
-[dlgDetalle, dlgCarrito].forEach((dlg) => {
+[dlgDetalle, dlgCarrito, dlgCondiciones].forEach((dlg) => {
   dlg.addEventListener("cancel", (e) => {   // tecla Escape
     e.preventDefault();
     // Si Noah está visible dentro del panel, Escape la cierra primero a ella
@@ -1398,7 +1481,17 @@ document.addEventListener("click", (e) => {
       else if (paso === "resumen") irAPaso("datos");
       break;
     case "confirmar":
+      if (!aceptaCondiciones) {
+        errorCondiciones = true;
+        elCarritoPie.innerHTML = htmlPieResumen();
+        $("#acepta-condiciones").focus();
+        avisar("Marca la casilla para aceptar las condiciones y confirmar tu pedido.");
+        break;
+      }
       confirmarPedido(btn);
+      break;
+    case "ver-condiciones":
+      abrirCondiciones(btn);
       break;
     case "copiar-sinpe":
       copiarSinpe(btn);
@@ -1526,6 +1619,19 @@ elCarritoContenido.addEventListener("submit", (e) => {
   irAPaso("resumen");
 });
 
+// Casilla "acepto las condiciones" (en el pie del paso de resumen)
+elCarritoPie.addEventListener("change", (e) => {
+  if (e.target.id !== "acepta-condiciones") return;
+  aceptaCondiciones = e.target.checked;
+  if (aceptaCondiciones && errorCondiciones) {
+    errorCondiciones = false;
+    e.target.removeAttribute("aria-invalid");
+    e.target.removeAttribute("aria-describedby");
+    e.target.closest(".aceptar").classList.remove("aceptar--error");
+    $("#error-condiciones")?.remove();
+  }
+});
+
 elCarritoAtras.addEventListener("click", () => {
   if (paso === "datos") { leerFormulario(); irAPaso("carrito"); }
   else if (paso === "resumen") irAPaso("datos");
@@ -1550,9 +1656,6 @@ function aplicarConfig() {
   wa.href = `https://wa.me/${encodeURIComponent(CONFIG.whatsapp)}`;
   wa.textContent = `WhatsApp: ${local.slice(0, 4)}-${local.slice(4)}`;
 
-  $("#pie-condiciones").textContent =
-    `Los pedidos se apartan con el ${CONFIG.porcentajeAdelanto} % por SINPE Móvil. ` +
-    `El resto se paga al recibir. Pedidos hasta el ${CONFIG.fechaLimitePedidos}.`;
 }
 
 function iniciarAnimacionFondo() {
