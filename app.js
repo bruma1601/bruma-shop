@@ -35,6 +35,13 @@ const CONFIG = {
   // pedido se envía solo por WhatsApp.
   urlPedidos: "https://script.google.com/macros/s/AKfycbwtX8F5pieMSEPBklOCMytOTcMh7DI4kqksKRIQuCIRjYIhVtiw8bmgQ3T_-QTXGY5weA/exec",
 
+  // Salón de uñas, para quien elige "Recoger en el salón". La dirección sale bajo esa
+  // opción del formulario, en el resumen, en "¡Pedido apartado!" y en el mensaje de WhatsApp.
+  salon: {
+    direccion: "75 metros sur de la parada de taxis, Santiago de Puriscal",
+    mapa: "https://www.google.com/maps?q=9.849999,-84.316704"   // enlace "Ver en el mapa"; "" = sin enlace
+  },
+
   // Entrega. Opciones del formulario: "Recoger en el salón" (gratis)
   // o "Entrega a domicilio" (costo calculado con el mapa).
   //
@@ -47,19 +54,15 @@ const CONFIG = {
   // Si el consumo real del carro es otro, cambiar costoPorKm así:
   //   Consumo real → costoPorKm: 10 km/L → 120 · 12 km/L → 100 · 14 km/L → 85 · 16 km/L → 75
   entrega: {
-    // Dirección del salón de uñas, para quien elige recogerlo. Se muestra debajo de
-    // "Recoger en el salón" y en el resumen. Vacío ("") = no se muestra.
-    direccionSalon: "",        // EJEMPLO: "Santiago de Puriscal, 100 m norte del parque"
-
-    // Punto de salida de las entregas (el salón). Las coordenadas NO se muestran en la página.
-    // Para obtenerlas: en Google Maps, mantener presionado el lugar y copiar los
-    // números (ej.: 9.8471, -84.3143). Mientras estén en 0, el costo dice
-    // "Te confirmamos el costo por WhatsApp".
+    // Puntos de salida de las entregas. Se usa el más cercano al cliente.
+    // Los que tengan lat/lng en 0 se ignoran. Las coordenadas NO se muestran en la página.
+    // Para obtenerlas: en Google Maps, mantener presionado el lugar y copiar los dos números.
     origenes: [
-      { nombre: "Salón", lat: 0, lng: 0 }      // EJEMPLO: pegar coordenadas reales del salón
+      { nombre: "Salón", lat: 9.849999, lng: -84.316704 }
+      // { nombre: "Casa", lat: 0, lng: 0 },  // agregar cuando tengamos las coordenadas
     ],
-    // Dónde empieza el mapa antes de que la persona marque su casa
-    centroMapa: { lat: 9.8467, lng: -84.3131, zoom: 15 },   // Santiago de Puriscal (centro)
+    // Dónde empieza el mapa antes de que la persona marque su casa (el salón)
+    centroMapa: { lat: 9.849999, lng: -84.316704, zoom: 14 },
     factorCalle: 1.5,          // carreteras de montaña: la ruta real es ~50 % más larga que la línea recta
     costoPorKm: 100,           // (₡806 el litro ÷ 12 km/L del Suzuki Vitara) × 1,5 de desgaste
     idaYVuelta: false,         // las entregas se hacen en ruta: el regreso se reparte entre todos
@@ -928,6 +931,19 @@ function htmlOpcionEntrega(valor, detalle) {
     </label>`;
 }
 
+/** Dirección del salón ("" si no está configurada). */
+function direccionSalon() {
+  return String(CONFIG.salon?.direccion || "").trim();
+}
+
+/** Enlace " Ver en el mapa" a Google Maps del salón (vacío si no hay URL). */
+function htmlEnlaceMapaSalon() {
+  const url = String(CONFIG.salon?.mapa || "").trim();
+  return url
+    ? ` <a class="enlace-mapa" href="${escapar(url)}" target="_blank" rel="noopener">Ver en el mapa<span class="visualmente-oculto"> (se abre en otra pestaña)</span></a>`
+    : "";
+}
+
 /** Días de entrega válidos (desde CONFIG). */
 function diasEntrega() {
   return (CONFIG.entrega.diasEntrega || []).map((x) => String(x).trim()).filter(Boolean);
@@ -1037,9 +1053,8 @@ function htmlPasoDatos() {
 
       <fieldset class="campo campo--opciones">
         <legend>¿Cómo lo recibes?</legend>
-        ${htmlOpcionEntrega("salon", CONFIG.entrega.direccionSalon.trim()
-          ? `Gratis · ${escapar(CONFIG.entrega.direccionSalon.trim())}`
-          : "Gratis")}
+        ${htmlOpcionEntrega("salon", `Gratis${direccionSalon()
+          ? `<span class="opcion__dir">${escapar(direccionSalon())}${htmlEnlaceMapaSalon()}</span>` : ""}`)}
         ${htmlOpcionEntrega("domicilio", "Costo según la distancia")}
       </fieldset>
 
@@ -1138,8 +1153,8 @@ function htmlPasoResumen() {
           <div><dt>Nombre</dt><dd>${escapar(datos.nombre.trim())}</dd></div>
           <div><dt>WhatsApp</dt><dd>${escapar(telefonoNormal(datos.telefono))}</dd></div>
           <div><dt>Entrega</dt><dd>${textoEntrega(datos)}</dd></div>
-          ${datos.entrega === "salon" && CONFIG.entrega.direccionSalon.trim()
-            ? `<div><dt>Dirección</dt><dd>${escapar(CONFIG.entrega.direccionSalon.trim())}</dd></div>` : ""}
+          ${datos.entrega === "salon" && direccionSalon()
+            ? `<div><dt>Dirección</dt><dd>${escapar(direccionSalon())}${htmlEnlaceMapaSalon()}</dd></div>` : ""}
           ${datos.entrega === "domicilio" ? `<div><dt>Señas</dt><dd>${escapar(datos.senas.trim())}</dd></div>` : ""}
           ${datos.dia ? `<div><dt>Día</dt><dd>${escapar(conMayuscula(datos.dia))}</dd></div>` : ""}
           ${datos.notas.trim() ? `<div><dt>Notas</dt><dd>${escapar(datos.notas.trim())}</dd></div>` : ""}
@@ -1175,6 +1190,8 @@ function htmlPasoFinal() {
       <p class="final__texto">Tu número de pedido es</p>
       <p class="final__numero">${escapar(f.numero)}</p>
       ${f.dia ? `<p class="final__dia">Día: <strong>${escapar(conMayuscula(f.dia))}</strong></p>` : ""}
+      ${f.entrega === "salon" && direccionSalon()
+        ? `<p class="final__dir">Recoges en el salón: ${escapar(direccionSalon())}.${htmlEnlaceMapaSalon()}</p>` : ""}
       <p class="final__adelanto">${f.adelanto == null
         ? "El adelanto te lo confirmamos por WhatsApp."
         : `Adelanto a pagar: <strong>${formatoColones(f.adelanto)}</strong>`}</p>
@@ -1226,6 +1243,8 @@ function construirMensaje(numero, d, calc) {
     if (enlaceMapa(d)) lineas.push(`Ubicación: ${enlaceMapa(d)}`);
   } else {
     lineas.push(`${textoEntrega(d)} (gratis)`);
+    if (direccionSalon()) lineas.push(`Dirección: ${direccionSalon()}`);
+    if (CONFIG.salon?.mapa) lineas.push(`Mapa: ${CONFIG.salon.mapa}`);
   }
   if (d.dia) lineas.push(`Día: ${d.dia}`);
   if (d.notas.trim()) lineas.push(`Notas: ${d.notas.trim()}`);
@@ -1339,6 +1358,7 @@ function terminarPedido(calc, sinConfirmar) {
     numero: numeroPedido,
     adelanto: calc.adelanto,
     dia: datos.dia,
+    entrega: datos.entrega,
     mensaje: construirMensaje(numeroPedido, datos, calc),
     sinConfirmar
   };

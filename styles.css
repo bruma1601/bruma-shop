@@ -1123,6 +1123,15 @@ p { margin: 0; }
 .pie__entregas { max-width: 46ch; margin: 20px auto 0; font-weight: 700; line-height: 1.5; }
 .pie__entregas + .pie__condiciones { margin-top: 4px; }
 .final__dia { font-size: 1.05rem; }
+.final__dir { font-size: .95rem; color: var(--tinta-suave); }
+.opcion__dir { display: block; margin-top: 2px; line-height: 1.4; }
+.enlace-mapa {
+  color: var(--rojo-oscuro);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
 .pie__enlace {
   padding: 8px 4px;
   border: 0;

@@ -63,10 +63,10 @@ Sin foto (`foto: ""`) se ve un espacio que dice "Foto próximamente".
 
 En `CONFIG.entrega` se configura el costo de entrega a domicilio:
 
-- `direccionSalon`: la dirección del salón de uñas para quien elige "Recoger en el salón". Vacía = no se muestra.
-- `origenes`: coordenadas del salón (desde donde salen las entregas). **Mientras estén en 0, el costo sale "por confirmar".**
+- `CONFIG.salon` (fuera de `entrega`): `direccion` y `mapa` (enlace de Google Maps) del salón de uñas. Salen bajo "Recoger en el salón", en el resumen, en "¡Pedido apartado!" y en el mensaje de WhatsApp. Dirección vacía = no se muestra.
+- `origenes`: desde dónde salen las entregas (hoy, solo el salón). Se usa el más cercano al cliente, y los que tengan coordenadas en 0 se ignoran. Para agregar la casa, quite las `//` de su línea y ponga sus coordenadas. **Si todos están en 0, el costo sale "por confirmar".**
   Para obtenerlas: en Google Maps, mantenga presionado el lugar y copie los dos números (ej.: `9.9325, -84.0796`). No se muestran en la página.
-- `centroMapa`: dónde empieza el mapa (ahora Santiago de Puriscal) y su nivel de zoom.
+- `centroMapa`: dónde empieza el mapa (ahora, el salón) y su nivel de zoom.
 - `factorCalle`, `costoPorKm`, `idaYVuelta`, `velocidadPromedio`, `valorHora`, `minimo`, `redondeo`: cómo se calcula el precio (ver abajo).
 - `distanciaMaximaKm`: si la entrega queda a más de estos km **de viaje**, dice "Te confirmamos el costo por WhatsApp". Con 30 km de viaje, el límite queda a unos 20 km en línea recta.
 - `diasEntrega`: los días en que se entrega, por ejemplo `["viernes 18 de diciembre", "sábado 19 de diciembre"]`. Se pueden agregar o quitar días (cada uno entre comillas, separados por comas). En el formulario sale la pregunta obligatoria "¿Qué día lo quieres?" con esos días. El pie de página dice "Entregamos el viernes 18 y el sábado 19 de diciembre". En la hoja de Google, el día va dentro de la columna **Entrega**, por ejemplo `domicilio · sábado 19 de diciembre`.
