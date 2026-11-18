@@ -1123,6 +1123,68 @@ p { margin: 0; }
 .pie__entregas { max-width: 46ch; margin: 20px auto 0; font-weight: 700; line-height: 1.5; }
 .pie__entregas + .pie__condiciones { margin-top: 4px; }
 .final__dia { font-size: 1.05rem; }
+
+/* Pedido pendiente de enviar por WhatsApp */
+.aviso-pendiente { margin: 12px 12px 0; }
+.aviso-pendiente[hidden] { display: none; }
+.aviso-pendiente .banner { margin: 0; }
+.banner--pendiente {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 14px;
+  flex-wrap: wrap;
+  background: #FFF4E5;
+  color: var(--tinta);
+  border: 2px solid #E8A33D;
+}
+.banner--pendiente p { margin: 0; flex: 1 1 200px; }
+.btn--chico { width: auto; min-height: 40px; padding: 0 18px; font-size: .95rem; }
+
+.final__icono--wa { background: #E7F6EE; color: var(--verde-boton); }
+.final__ultimo {
+  margin: 0;
+  padding: 12px 14px;
+  border-left: 4px solid var(--verde-boton);
+  border-radius: 10px;
+  background: #EEF8F2;
+  color: var(--tinta);
+  font-weight: 800;
+  line-height: 1.4;
+  text-align: left;
+}
+.final__pregunta {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 14px;
+  border-radius: var(--radio-m);
+  background: var(--crema-suave);
+}
+.final__pregunta[hidden], .final__mensaje[hidden] { display: none; }
+.final__pregunta-texto { margin: 0; font-weight: 800; }
+.final__mensaje { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+.final__mensaje label { font-weight: 700; line-height: 1.4; }
+.final__mensaje textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #E3D2BC;
+  border-radius: 12px;
+  background: var(--blanco);
+  color: var(--tinta);
+  font: inherit;
+  font-size: .9rem;
+  line-height: 1.45;
+  resize: vertical;
+}
+.final__reintentar { margin: 0; font-size: .9rem; color: var(--tinta-suave); }
+.btn-texto--chico { min-height: 40px; font-size: .9rem; font-weight: 700; align-self: center; }
+
+.cancelar { display: flex; flex-direction: column; gap: 10px; }
+.cancelar p { margin: 0; line-height: 1.45; }
+.cancelar__botones { display: flex; gap: 10px; }
+.cancelar__botones .btn { flex: 1; }
 .final__dir { font-size: .95rem; color: var(--tinta-suave); }
 .opcion__dir { display: block; margin-top: 2px; line-height: 1.4; }
 .enlace-mapa {

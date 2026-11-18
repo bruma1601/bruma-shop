@@ -175,6 +175,17 @@ Las imágenes son `img/noah.webp` y `img/noah.png` (con fondo transparente).
 - **No cambie los `id`** (`bolsita`, `cajita`, `latita`). Deben ser iguales a los de la hoja de Google.
 - Respete comas, comillas y llaves. Si la página queda en blanco después de un cambio, probablemente falta una coma o una comilla.
 
+## Envío del pedido por WhatsApp
+
+Al confirmar, el pedido se registra en la hoja (si hay `urlPedidos`), pero **no está listo hasta que la persona lo envía por WhatsApp**:
+
+1. La pantalla dice "Falta un paso" y tiene un solo botón: "Enviar pedido por WhatsApp".
+2. Al tocarlo, aparece "¿Ya enviaste el mensaje en WhatsApp?":
+   - "Sí, ya lo envié": muestra "¡Pedido enviado!" con los datos del SINPE y vacía el carrito.
+   - "No se abrió WhatsApp": muestra el mensaje para copiarlo y el número de la tienda.
+3. Si la persona cierra la página sin confirmar, el pedido queda guardado en ese navegador. Al volver, aparece arriba "Tu pedido GN-… todavía no se ha enviado por WhatsApp" con el botón "Enviar ahora", que no lo registra otra vez en la hoja.
+4. El pedido pendiente se borra solo a los 3 días (`DIAS_PEDIDO_PENDIENTE` en `app.js`), o si la persona usa "Cancelar este pedido y empezar uno nuevo".
+
 ## Hoja de Google (opcional)
 
 Si `urlPedidos` está vacío, todo se ve disponible y el pedido se envía solo por WhatsApp.

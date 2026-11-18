@@ -796,14 +796,34 @@ let datos = { nombre: "", telefono: "", entrega: "salon", dia: "", senas: "", la
 /** true cuando la persona ya eligió la entrega en el formulario (para mostrarla en los totales). */
 let entregaElegida = false;
 let errores = {};
-/** Pedido ya apartado: se guarda para poder reabrir WhatsApp sin registrarlo de nuevo. */
-let pedidoFinal = leerGuardado(CLAVE_PEDIDO, null);
+/**
+ * Pedido registrado pero TODAVÍA NO enviado por WhatsApp (pendiente).
+ * Se guarda en localStorage { numero, mensaje, fecha, ... } para poder enviarlo
+ * más tarde sin registrarlo de nuevo en la hoja. Se borra al confirmar el envío,
+ * al cancelarlo o a los 3 días.
+ */
+const DIAS_PEDIDO_PENDIENTE = 3;
+let pedidoFinal = cargarPedidoPendiente();
+/** Pedido que la persona confirmó haber enviado (solo en memoria, para la pantalla final). */
+let pedidoEnviado = null;
+/** La persona tocó "Enviar pedido por WhatsApp" en esta visita. */
+let whatsappAbierto = false;
+let mostrarMensajeWa = false;
+let confirmandoCancelar = false;
+
+function cargarPedidoPendiente() {
+  const p = leerGuardado(CLAVE_PEDIDO, null);
+  const vigente = p && typeof p === "object" && p.numero && p.mensaje && Number.isFinite(p.fecha)
+    && Date.now() - p.fecha < DIAS_PEDIDO_PENDIENTE * 24 * 60 * 60 * 1000;
+  if (!vigente && p) guardar(CLAVE_PEDIDO, null);   // vencido o de una versión anterior
+  return vigente ? p : null;
+}
 
 const TITULOS = {
   carrito: "Tu carrito",
   datos: "Tus datos",
   resumen: "Revisa tu pedido",
-  final: "¡Pedido apartado!"
+  final: "Falta un paso"
 };
 
 function generarNumeroPedido() {
@@ -825,7 +845,7 @@ function htmlVistaCarrito(vista) {
 
   if (lineas.length === 0) {
     return {
-      cuerpo: `${aviso}
+      cuerpo: `${aviso}${htmlAvisoPendiente()}
         <div class="carrito__vacio">
           <div class="carrito__vacio-icono"><svg aria-hidden="true"><use href="#i-galleta"/></svg></div>
           <h3>Tu pedido está vacío</h3>
@@ -875,9 +895,7 @@ function htmlVistaCarrito(vista) {
       </li>`;
   }).join("");
 
-  const apartado = pedidoFinal
-    ? `<p class="banner banner--info">Ya apartaste el pedido <strong>${escapar(pedidoFinal.numero)}</strong>. Puedes ver la confirmación y volver a abrir WhatsApp.</p>`
-    : "";
+  const apartado = htmlAvisoPendiente();
 
   const problemas = hayProblemas();
   // La entrega va como línea aparte (cuando ya se eligió en el formulario)
@@ -897,10 +915,20 @@ function htmlVistaCarrito(vista) {
       <div class="totales">${totales}</div>
       ${problemas ? `<p class="carrito__alerta">Ajusta los productos marcados para poder continuar.</p>` : ""}
       <button type="button" class="btn btn--pedido" data-accion="hacer-pedido" ${problemas && !pedidoFinal ? "disabled" : ""}>
-        ${pedidoFinal ? "Ver mi pedido apartado" : "Hacer pedido"}
+        ${pedidoFinal ? "Terminar mi pedido" : "Hacer pedido"}
       </button>
       <p class="carrito__nota">Se aparta con el ${CONFIG.porcentajeAdelanto}&nbsp;% por SINPE Móvil.</p>`
   };
+}
+
+/** Aviso "Tu pedido GN-… todavía no se ha enviado por WhatsApp" + "Enviar ahora". */
+function htmlAvisoPendiente() {
+  if (!pedidoFinal) return "";
+  return `
+    <div class="banner banner--pendiente" role="status">
+      <p>Tu pedido <strong>${escapar(pedidoFinal.numero)}</strong> todavía no se ha enviado por WhatsApp.</p>
+      <button type="button" class="btn btn--whatsapp btn--chico" data-accion="enviar-ahora">Enviar ahora</button>
+    </div>`;
 }
 
 /** Pinta las DOS vistas del carrito a partir del mismo estado. */
@@ -909,6 +937,12 @@ function pintarVistasCarrito() {
   elPedidoContenido.innerHTML = seccion.cuerpo + (seccion.pie ? `<div class="pedido__pie">${seccion.pie}</div>` : "");
   if (paso === "carrito") pintarCarrito();   // el panel, si está en el paso del carrito
   actualizarBarra();
+  // Aviso arriba de la página (fuera del carrito)
+  const arriba = $("#aviso-pendiente");
+  if (arriba) {
+    arriba.innerHTML = htmlAvisoPendiente();
+    arriba.hidden = !pedidoFinal;
+  }
 }
 
 /* --- Paso 2: datos --- */
@@ -1175,7 +1209,53 @@ function urlWhatsApp(mensaje) {
   return `https://wa.me/${encodeURIComponent(CONFIG.whatsapp)}?text=${encodeURIComponent(mensaje)}`;
 }
 
+/** "8648-5190" a partir de CONFIG.whatsapp ("50686485190"). */
+function whatsappTienda() {
+  const local = CONFIG.whatsapp.replace(/^506/, "");
+  return `${local.slice(0, 4)}-${local.slice(4)}`;
+}
+
+/** Datos del pedido que se repiten en las dos versiones de la pantalla final. */
+function htmlDatosFinal(f) {
+  return `
+      <p class="final__texto">Tu número de pedido es</p>
+      <p class="final__numero">${escapar(f.numero)}</p>
+      ${f.dia ? `<p class="final__dia">Día: <strong>${escapar(conMayuscula(f.dia))}</strong></p>` : ""}
+      ${f.entrega === "salon" && direccionSalon()
+        ? `<p class="final__dir">Recoges en el salón: ${escapar(direccionSalon())}.${htmlEnlaceMapaSalon()}</p>` : ""}`;
+}
+
+function htmlBotonWhatsApp(f, accion = "abrir-whatsapp") {
+  return `
+      <a class="btn btn--whatsapp" href="${escapar(urlWhatsApp(f.mensaje))}" target="_blank" rel="noopener" data-accion="${accion}">
+        <svg aria-hidden="true"><use href="#i-whatsapp"/></svg>
+        Enviar pedido por WhatsApp<span class="visualmente-oculto"> (se abre WhatsApp)</span>
+      </a>`;
+}
+
 function htmlPasoFinal() {
+  // --- Ya confirmó que envió el mensaje ---
+  if (!pedidoFinal && pedidoEnviado) {
+    const f = pedidoEnviado;
+    return `
+    <div class="final">
+      <!-- Espacio fijo: aquí aparece Noah dando las gracias (sin mover lo de abajo) -->
+      <div class="final__noah" id="final-noah">
+        <div class="final__icono"><svg aria-hidden="true"><use href="#i-regalo"/></svg></div>
+      </div>
+      ${htmlDatosFinal(f)}
+      <p class="final__adelanto">${f.adelanto == null
+        ? "El adelanto te lo confirmamos por WhatsApp."
+        : `Adelanto a pagar: <strong>${formatoColones(f.adelanto)}</strong>`}</p>
+      <p class="aviso-reembolso">Tienes ${CONFIG.condiciones.horasParaPagar} horas para enviar el adelanto por SINPE. Si no, el pedido se cancela.</p>
+      ${htmlSinpe(f.adelanto)}
+      <p class="final__recordatorio">
+        <strong>Importante:</strong> envía el comprobante del SINPE por el mismo chat de WhatsApp.
+      </p>
+    </div>`;
+  }
+
+  // --- Pedido registrado, falta enviarlo por WhatsApp ---
   const f = pedidoFinal;
   const aviso = f.sinConfirmar
     ? `<p class="banner banner--info">No pudimos confirmar en línea, pero puedes enviar tu pedido por WhatsApp.</p>`
@@ -1183,35 +1263,43 @@ function htmlPasoFinal() {
   return `
     <div class="final">
       ${aviso}
-      <!-- Espacio fijo: aquí aparece Noah al confirmar (sin mover los botones de abajo) -->
-      <div class="final__noah" id="final-noah">
-        <div class="final__icono"><svg aria-hidden="true"><use href="#i-regalo"/></svg></div>
+      <div class="final__icono final__icono--wa"><svg aria-hidden="true"><use href="#i-whatsapp"/></svg></div>
+      ${htmlDatosFinal(f)}
+      <p class="final__ultimo">Último paso: envía tu pedido por WhatsApp. Sin este mensaje no podemos prepararlo.</p>
+      ${htmlBotonWhatsApp(f)}
+
+      <div class="final__pregunta" id="final-pregunta" ${whatsappAbierto ? "" : "hidden"}>
+        <p class="final__pregunta-texto">¿Ya enviaste el mensaje en WhatsApp?</p>
+        <button type="button" class="btn btn--pedido" data-accion="confirmar-enviado">Sí, ya lo envié</button>
+        <button type="button" class="btn-texto" data-accion="ver-mensaje" aria-expanded="${mostrarMensajeWa}" aria-controls="final-mensaje">No se abrió WhatsApp</button>
       </div>
-      <p class="final__texto">Tu número de pedido es</p>
-      <p class="final__numero">${escapar(f.numero)}</p>
-      ${f.dia ? `<p class="final__dia">Día: <strong>${escapar(conMayuscula(f.dia))}</strong></p>` : ""}
-      ${f.entrega === "salon" && direccionSalon()
-        ? `<p class="final__dir">Recoges en el salón: ${escapar(direccionSalon())}.${htmlEnlaceMapaSalon()}</p>` : ""}
-      <p class="final__adelanto">${f.adelanto == null
-        ? "El adelanto te lo confirmamos por WhatsApp."
-        : `Adelanto a pagar: <strong>${formatoColones(f.adelanto)}</strong>`}</p>
-      <p class="aviso-reembolso">Tienes ${CONFIG.condiciones.horasParaPagar} horas para enviar el adelanto por SINPE. Si no, el pedido se cancela.</p>
 
-      ${htmlSinpe(f.adelanto)}
-
-      <a class="btn btn--whatsapp" href="${escapar(urlWhatsApp(f.mensaje))}" target="_blank" rel="noopener">
-        <svg aria-hidden="true"><use href="#i-whatsapp"/></svg>
-        Enviar pedido por WhatsApp
-      </a>
-      <p class="final__recordatorio">
-        <strong>Importante:</strong> envía el comprobante del SINPE por ese mismo chat de WhatsApp.
-        Puedes volver a abrir WhatsApp con el botón verde cuando quieras.
-      </p>
+      <div class="final__mensaje" id="final-mensaje" ${mostrarMensajeWa ? "" : "hidden"}>
+        <label for="mensaje-wa">Copia este mensaje y envíalo a nuestro WhatsApp <strong>+506 ${escapar(whatsappTienda())}</strong>:</label>
+        <textarea id="mensaje-wa" rows="9" readonly>${escapar(f.mensaje)}</textarea>
+        <button type="button" class="btn btn--copiar" data-accion="copiar-mensaje">Copiar mensaje</button>
+        <p class="sinpe__ayuda" id="mensaje-ayuda" aria-live="polite"></p>
+        <p class="final__reintentar">O vuelve a intentar con el botón verde de arriba.</p>
+      </div>
     </div>`;
 }
 
 function htmlPieFinal() {
-  return `<button type="button" class="btn btn--secundario" data-accion="vaciar">Vaciar carrito y empezar de nuevo</button>`;
+  if (!pedidoFinal) {
+    return `<button type="button" class="btn btn--secundario" data-accion="ver-presentaciones">Seguir viendo presentaciones</button>`;
+  }
+  if (confirmandoCancelar) {
+    return `
+      <div class="cancelar" role="group" aria-labelledby="cancelar-texto">
+        <p id="cancelar-texto"><strong>¿Cancelar el pedido ${escapar(pedidoFinal.numero)} y empezar uno nuevo?</strong>
+          Si ya enviaste el adelanto, escríbenos por WhatsApp.</p>
+        <div class="cancelar__botones">
+          <button type="button" class="btn btn--secundario" data-accion="cancelar-no">No, volver</button>
+          <button type="button" class="btn btn--rojo" data-accion="cancelar-si">Sí, cancelar</button>
+        </div>
+      </div>`;
+  }
+  return `<button type="button" class="btn-texto btn-texto--chico" data-accion="cancelar-pedido">Cancelar este pedido y empezar uno nuevo</button>`;
 }
 
 /** Mensaje de WhatsApp, en líneas. */
@@ -1258,7 +1346,8 @@ function construirMensaje(numero, d, calc) {
 
 /* --- Pintar el panel según el paso --- */
 function pintarCarrito(enfocarTitulo = false) {
-  elCarritoTitulo.textContent = TITULOS[paso];
+  if (paso === "final" && !pedidoFinal && !pedidoEnviado) paso = "carrito";
+  elCarritoTitulo.textContent = paso === "final" && !pedidoFinal ? "¡Pedido enviado!" : TITULOS[paso];
   elCarritoAtras.hidden = !(paso === "datos" || paso === "resumen");
 
   let cuerpo, pie;
@@ -1353,6 +1442,7 @@ function manejarAgotados(ids) {
   cargarExistencias();   // trae las existencias reales de la hoja
 }
 
+/** El pedido quedó registrado: falta enviarlo por WhatsApp (queda pendiente). */
 function terminarPedido(calc, sinConfirmar) {
   pedidoFinal = {
     numero: numeroPedido,
@@ -1360,29 +1450,85 @@ function terminarPedido(calc, sinConfirmar) {
     dia: datos.dia,
     entrega: datos.entrega,
     mensaje: construirMensaje(numeroPedido, datos, calc),
+    fecha: Date.now(),
     sinConfirmar
   };
+  pedidoEnviado = null;
+  whatsappAbierto = false;
+  mostrarMensajeWa = false;
+  confirmandoCancelar = false;
   guardar(CLAVE_PEDIDO, pedidoFinal);
   irAPaso("final");
-  pintarVistasCarrito();   // la sección muestra que el pedido ya está apartado
-  // Noah celebra, dentro del espacio reservado de la pantalla final
-  mostrarNoah(CONFIG.noah.mensajePedido, "#i-huella", $("#final-noah"));
+  pintarVistasCarrito();   // la sección muestra el aviso de pedido pendiente
 }
 
-function vaciarYEmpezar() {
-  carrito = {};
-  guardarCarrito();
+/** Limpia todo para un pedido nuevo (se recuerdan nombre, teléfono, entrega, día y señas). */
+function reiniciarPedido(vaciarCarrito) {
+  if (vaciarCarrito) { carrito = {}; guardarCarrito(); }
   pedidoFinal = null;
   guardar(CLAVE_PEDIDO, null);
   numeroPedido = null;
   avisoCarrito = "";
-  datos = { ...datos, notas: "" };   // se recuerdan nombre, teléfono, entrega y señas
+  datos = { ...datos, notas: "" };
   errores = {};
   aceptaCondiciones = false;          // cada pedido nuevo se acepta de nuevo
   errorCondiciones = false;
+  whatsappAbierto = false;
+  mostrarMensajeWa = false;
+  confirmandoCancelar = false;
+}
+
+/** "Sí, ya lo envié": recién aquí se vacía el carrito y se borra el pedido pendiente. */
+function confirmarEnviado() {
+  pedidoEnviado = pedidoFinal;
+  reiniciarPedido(true);
+  actualizarTodo();
+  irAPaso("final");   // ahora muestra "¡Pedido enviado!" con el SINPE
+  mostrarNoah(CONFIG.noah.mensajePedido, "#i-huella", $("#final-noah"));
+  avisar("¡Pedido enviado! Gracias.");
+}
+
+/** "Cancelar este pedido y empezar uno nuevo" (después de confirmar en la página). */
+function cancelarPedidoPendiente() {
+  const numero = pedidoFinal?.numero;
+  reiniciarPedido(false);             // se conserva lo que había en el carrito
   actualizarTodo();
   irAPaso("carrito");
-  avisar("Carrito vacío. Puedes empezar un pedido nuevo.");
+  avisar(`Pedido ${numero} cancelado. Puedes hacer uno nuevo.`);
+}
+
+/* --- Copiar el mensaje de WhatsApp (cuando no se abrió WhatsApp) --- */
+async function copiarMensaje(boton) {
+  const area = $("#mensaje-wa");
+  const ayuda = $("#mensaje-ayuda");
+  const texto = area.value;
+  let ok = false;
+  try {
+    // Si el portapapeles no responde en 1,5 s (algunos navegadores se quedan esperando), se usa el respaldo
+    await Promise.race([
+      navigator.clipboard.writeText(texto),
+      new Promise((_, no) => setTimeout(() => no(new Error("sin respuesta")), 1500))
+    ]);
+    ok = true;
+  } catch {
+    // Respaldo: seleccionar el cuadro y usar el comando de copiar del navegador
+    try {
+      area.focus();
+      area.select();
+      area.setSelectionRange(0, texto.length);
+      ok = document.execCommand("copy");
+    } catch { ok = false; }
+  }
+  if (ok) {
+    boton.textContent = "¡Copiado!";
+    if (ayuda) ayuda.textContent = "Mensaje copiado. Pégalo en un chat con nuestro WhatsApp.";
+    setTimeout(() => { if (document.contains(boton)) boton.textContent = "Copiar mensaje"; }, 2000);
+  } else {
+    // Último recurso: el texto queda seleccionado para copiarlo a mano
+    area.focus();
+    area.select();
+    if (ayuda) ayuda.textContent = "No se pudo copiar solo. El mensaje quedó seleccionado: mantén presionado y elige Copiar.";
+  }
 }
 
 /* --- Copiar número de SINPE --- */
@@ -1654,8 +1800,36 @@ document.addEventListener("click", (e) => {
     case "pin-al-centro":
       pinAlCentro();
       break;
-    case "vaciar":
-      vaciarYEmpezar();
+    case "abrir-whatsapp":
+      // Es un enlace real: se deja abrir WhatsApp y se muestra la pregunta debajo
+      whatsappAbierto = true;
+      $("#final-pregunta")?.removeAttribute("hidden");
+      break;
+    case "confirmar-enviado":
+      confirmarEnviado();
+      break;
+    case "ver-mensaje":
+      mostrarMensajeWa = true;
+      $("#final-mensaje")?.removeAttribute("hidden");
+      btn.setAttribute("aria-expanded", "true");
+      $("#mensaje-wa")?.focus();
+      break;
+    case "copiar-mensaje":
+      copiarMensaje(btn);
+      break;
+    case "enviar-ahora":
+      // Lleva al último paso del pedido pendiente (sin registrarlo otra vez)
+      if (!dlgCarrito.open) abrirCarrito(btn);
+      irAPaso("final");
+      break;
+    case "cancelar-pedido":
+    case "cancelar-no":
+      confirmandoCancelar = accion === "cancelar-pedido";
+      elCarritoPie.innerHTML = htmlPieFinal();
+      $(confirmandoCancelar ? '[data-accion="cancelar-no"]' : '[data-accion="cancelar-pedido"]', elCarritoPie)?.focus();
+      break;
+    case "cancelar-si":
+      cancelarPedidoPendiente();
       break;
     case "ver-presentaciones": {
       const habiaPanel = dlgCarrito.open;
