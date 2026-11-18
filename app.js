@@ -61,14 +61,17 @@ const CONFIG = {
     // Dónde empieza el mapa antes de que la persona marque su casa
     centroMapa: { lat: 9.8467, lng: -84.3131, zoom: 15 },   // Santiago de Puriscal (centro)
     factorCalle: 1.5,          // carreteras de montaña: la ruta real es ~50 % más larga que la línea recta
-    costoPorKm: 100,           // (precio del litro ₡806 ÷ 12 km/L del Suzuki Vitara) × 1,5 de desgaste
-    idaYVuelta: false,         // un solo día de entregas en ruta: el regreso se reparte entre todos los pedidos
+    costoPorKm: 100,           // (₡806 el litro ÷ 12 km/L del Suzuki Vitara) × 1,5 de desgaste
+    idaYVuelta: false,         // las entregas se hacen en ruta: el regreso se reparte entre todos
     velocidadPromedio: 30,     // km/h promedio en las rutas de Puriscal
     valorHora: 2000,           // ₡ por hora de manejo
     minimo: 1500,              // costo mínimo de entrega
     redondeo: 500,             // redondear hacia arriba a múltiplos de esto
-    distanciaMaximaKm: 30,     // km DE VIAJE (no en línea recta); 30 ≈ 20 km en línea recta. Más lejos: "por confirmar"
-    diaEntrega: "",            // ej. "sábado 20 de diciembre"; vacío = "Te avisamos el día de entrega"
+    distanciaMaximaKm: 30,     // km DE VIAJE (≈ 20 km en línea recta); más lejos: "Te confirmamos el costo por WhatsApp"
+
+    // Días de entrega. La persona elige uno en el formulario (sirve para recoger y para domicilio).
+    // Se pueden agregar o quitar días: cada uno entre comillas, separados por comas.
+    diasEntrega: ["viernes 18 de diciembre", "sábado 19 de diciembre"],
     entregaGratisDesde: null   // ej. 25000 (₡ en productos); null = no aplica
   },
 
@@ -785,7 +788,8 @@ let avisoCarrito = "";        // mensaje destacado arriba del carrito (ej.: algo
 let numeroPedido = null;
 let enviando = false;
 // entrega: "salon" | "domicilio". lat/lng: punto del mapa (null = sin marcar).
-let datos = { nombre: "", telefono: "", entrega: "salon", senas: "", lat: null, lng: null, notas: "" };
+// dia: uno de CONFIG.entrega.diasEntrega ("" = sin elegir).
+let datos = { nombre: "", telefono: "", entrega: "salon", dia: "", senas: "", lat: null, lng: null, notas: "" };
 /** true cuando la persona ya eligió la entrega en el formulario (para mostrarla en los totales). */
 let entregaElegida = false;
 let errores = {};
@@ -924,6 +928,47 @@ function htmlOpcionEntrega(valor, detalle) {
     </label>`;
 }
 
+/** Días de entrega válidos (desde CONFIG). */
+function diasEntrega() {
+  return (CONFIG.entrega.diasEntrega || []).map((x) => String(x).trim()).filter(Boolean);
+}
+
+/** "Entregamos el viernes 18 y el sábado 19 de diciembre." (sin repetir el mes). */
+function textoDiasEntrega() {
+  const dias = diasEntrega();
+  if (!dias.length) return "Te avisamos el día de entrega por WhatsApp.";
+  const mes = dias[dias.length - 1].match(/ de \S+$/)?.[0];
+  const cortos = mes && dias.every((x) => x.endsWith(mes))
+    ? dias.map((x, i) => (i < dias.length - 1 ? x.slice(0, -mes.length) : x))
+    : dias;
+  const lista = cortos.length > 1
+    ? `${cortos.slice(0, -1).join(", el ")} y el ${cortos[cortos.length - 1]}`
+    : cortos[0];
+  return `Entregamos el ${lista}.`;
+}
+
+/** "sábado 19 de diciembre" → "Sábado 19 de diciembre" (solo para mostrar). */
+function conMayuscula(t) {
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+/** Pregunta obligatoria "¿Qué día lo quieres?" (vacía si no hay días configurados). */
+function htmlPreguntaDia() {
+  const dias = diasEntrega();
+  if (!dias.length) return "";
+  const opciones = dias.map((dia) => `
+    <label class="opcion opcion--tarjeta">
+      <input type="radio" name="dia" value="${escapar(dia)}" ${datos.dia === dia ? "checked" : ""}>
+      <span class="opcion__texto"><strong>${escapar(conMayuscula(dia))}</strong></span>
+    </label>`).join("");
+  return `
+    <fieldset class="campo campo--opciones" id="campo-dia" ${errores.dia ? `aria-describedby="error-dia"` : ""}>
+      <legend>¿Qué día lo quieres? <span class="obligatorio">(obligatorio)</span></legend>
+      ${opciones}
+      ${htmlCampoError("dia")}
+    </fieldset>`;
+}
+
 /** Bloque del mapa y el costo de entrega (solo si elige "Entrega a domicilio"). */
 function htmlDomicilio() {
   const domicilio = datos.entrega === "domicilio";
@@ -956,9 +1001,7 @@ function htmlDomicilio() {
 
 /** Texto junto al mapa: km, costo y día de entrega. */
 function htmlResultadoEntrega() {
-  const dia = CONFIG.entrega.diaEntrega
-    ? `Día de entrega: <strong>${escapar(CONFIG.entrega.diaEntrega)}</strong>`
-    : "Te avisamos el día de entrega por WhatsApp.";
+  const dia = escapar(textoDiasEntrega());
   if (datos.lat == null) {
     return `<p class="domicilio__costo">Marca tu casa en el mapa para calcular el costo de entrega.</p><p class="domicilio__dia">${dia}</p>`;
   }
@@ -1002,6 +1045,8 @@ function htmlPasoDatos() {
 
       ${htmlDomicilio()}
 
+      ${htmlPreguntaDia()}
+
       <div class="campo">
         <label for="f-notas">Notas <span class="opcional">(opcional)</span></label>
         <textarea id="f-notas" name="notas" rows="2" maxlength="300"
@@ -1026,6 +1071,7 @@ function leerFormulario() {
     nombre: String(f.get("nombre") || ""),
     telefono: String(f.get("telefono") || ""),
     entrega: TIPOS_ENTREGA[tipo] ? tipo : "salon",
+    dia: String(f.get("dia") ?? ""),
     senas: String(f.get("senas") ?? datos.senas),
     notas: String(f.get("notas") || "")
   };
@@ -1042,6 +1088,7 @@ function validarDatos(d) {
     if (d.lat == null && !mapaFallo) e.ubicacion = "Marca tu casa en el mapa: toca el mapa, arrastra el pin o usa tu ubicación.";
     if (d.senas.trim().length < 10) e.senas = "Escribe las señas para llegar (mínimo 10 caracteres).";
   }
+  if (diasEntrega().length && !diasEntrega().includes(d.dia)) e.dia = "Elige el día en que quieres tu pedido.";
   return e;
 }
 
@@ -1094,7 +1141,7 @@ function htmlPasoResumen() {
           ${datos.entrega === "salon" && CONFIG.entrega.direccionSalon.trim()
             ? `<div><dt>Dirección</dt><dd>${escapar(CONFIG.entrega.direccionSalon.trim())}</dd></div>` : ""}
           ${datos.entrega === "domicilio" ? `<div><dt>Señas</dt><dd>${escapar(datos.senas.trim())}</dd></div>` : ""}
-          ${entrega && entrega.tipo === "domicilio" ? `<div><dt>Día</dt><dd>${CONFIG.entrega.diaEntrega ? escapar(CONFIG.entrega.diaEntrega) : "Te avisamos por WhatsApp"}</dd></div>` : ""}
+          ${datos.dia ? `<div><dt>Día</dt><dd>${escapar(conMayuscula(datos.dia))}</dd></div>` : ""}
           ${datos.notas.trim() ? `<div><dt>Notas</dt><dd>${escapar(datos.notas.trim())}</dd></div>` : ""}
         </dl>
       </div>
@@ -1127,6 +1174,7 @@ function htmlPasoFinal() {
       </div>
       <p class="final__texto">Tu número de pedido es</p>
       <p class="final__numero">${escapar(f.numero)}</p>
+      ${f.dia ? `<p class="final__dia">Día: <strong>${escapar(conMayuscula(f.dia))}</strong></p>` : ""}
       <p class="final__adelanto">${f.adelanto == null
         ? "El adelanto te lo confirmamos por WhatsApp."
         : `Adelanto a pagar: <strong>${formatoColones(f.adelanto)}</strong>`}</p>
@@ -1179,6 +1227,7 @@ function construirMensaje(numero, d, calc) {
   } else {
     lineas.push(`${textoEntrega(d)} (gratis)`);
   }
+  if (d.dia) lineas.push(`Día: ${d.dia}`);
   if (d.notas.trim()) lineas.push(`Notas: ${d.notas.trim()}`);
   lineas.push("");
   lineas.push("Te envío el comprobante del SINPE por aquí.");
@@ -1231,7 +1280,9 @@ async function confirmarPedido(boton) {
     pedido: numeroPedido,
     nombre: datos.nombre.trim(),
     telefono: telefonoNormal(datos.telefono),
-    entrega: TIPOS_ENTREGA[datos.entrega].hoja,                    // "salón" | "domicilio"
+    // "salón · viernes 18 de diciembre" | "domicilio · sábado 19 de diciembre"
+    // (el día va dentro de "entrega" para no cambiar el Apps Script)
+    entrega: [TIPOS_ENTREGA[datos.entrega].hoja, datos.dia].filter(Boolean).join(" · "),
     costoEntrega: !calc.entrega ? "" : calc.entrega.costo == null ? "" : calc.entrega.costo,   // "" = por confirmar
     senas: datos.entrega === "domicilio" ? datos.senas.trim() : "",
     enlaceMapa: enlaceMapa(datos),
@@ -1287,6 +1338,7 @@ function terminarPedido(calc, sinConfirmar) {
   pedidoFinal = {
     numero: numeroPedido,
     adelanto: calc.adelanto,
+    dia: datos.dia,
     mensaje: construirMensaje(numeroPedido, datos, calc),
     sinConfirmar
   };
@@ -1675,6 +1727,7 @@ elCarritoContenido.addEventListener("input", (e) => {
     e.target.removeAttribute("aria-invalid");
     e.target.removeAttribute("aria-describedby");
     $(`#error-${campo}`)?.remove();
+    if (campo === "dia") $("#campo-dia")?.removeAttribute("aria-describedby");
   }
 });
 
@@ -1735,6 +1788,9 @@ function aplicarConfig() {
   const local = CONFIG.whatsapp.replace(/^506/, "");
   wa.href = `https://wa.me/${encodeURIComponent(CONFIG.whatsapp)}`;
   wa.textContent = `WhatsApp: ${local.slice(0, 4)}-${local.slice(4)}`;
+
+  const entregas = $("#pie-entregas");
+  if (entregas) entregas.textContent = textoDiasEntrega();
 
 }
 

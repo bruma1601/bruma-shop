@@ -1120,6 +1120,9 @@ p { margin: 0; }
   font-size: .92rem;
   line-height: 1.5;
 }
+.pie__entregas { max-width: 46ch; margin: 20px auto 0; font-weight: 700; line-height: 1.5; }
+.pie__entregas + .pie__condiciones { margin-top: 4px; }
+.final__dia { font-size: 1.05rem; }
 .pie__enlace {
   padding: 8px 4px;
   border: 0;

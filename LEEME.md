@@ -69,7 +69,7 @@ En `CONFIG.entrega` se configura el costo de entrega a domicilio:
 - `centroMapa`: dónde empieza el mapa (ahora Santiago de Puriscal) y su nivel de zoom.
 - `factorCalle`, `costoPorKm`, `idaYVuelta`, `velocidadPromedio`, `valorHora`, `minimo`, `redondeo`: cómo se calcula el precio (ver abajo).
 - `distanciaMaximaKm`: si la entrega queda a más de estos km **de viaje**, dice "Te confirmamos el costo por WhatsApp". Con 30 km de viaje, el límite queda a unos 20 km en línea recta.
-- `diaEntrega`: por ejemplo `"sábado 20 de diciembre"`.
+- `diasEntrega`: los días en que se entrega, por ejemplo `["viernes 18 de diciembre", "sábado 19 de diciembre"]`. Se pueden agregar o quitar días (cada uno entre comillas, separados por comas). En el formulario sale la pregunta obligatoria "¿Qué día lo quieres?" con esos días. El pie de página dice "Entregamos el viernes 18 y el sábado 19 de diciembre". En la hoja de Google, el día va dentro de la columna **Entrega**, por ejemplo `domicilio · sábado 19 de diciembre`.
 - `entregaGratisDesde`: por ejemplo `25000` para dar entrega gratis desde ₡25 000 en productos. `null` = no aplica.
 
 #### Cómo se calcula el costo de entrega
