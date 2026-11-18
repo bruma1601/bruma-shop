@@ -125,8 +125,8 @@ const CONFIG = {
 const PRODUCTOS = [
   {
     id: "bolsita",
-    nombre: "Bolsita con batidor de globo",
-    descripcion: "Bolsita navideña con 3 bombas de chocolate y un batidor de globo pequeño de regalo. Se ponen en leche caliente y se baten para un chocolate delicioso.",
+    nombre: "Bolsa con batidor de globo",
+    descripcion: "Bolsa navideña con 3 bombas de chocolate y un batidor de globo pequeño de regalo. Se ponen en leche caliente y se baten para un chocolate delicioso.",
     precio: 3250,
     galletas: 3,
     unidad: "bombas de chocolate",
@@ -145,8 +145,8 @@ const PRODUCTOS = [
   },
   {
     id: "cajita",
-    nombre: "Cajita navideña de cartón",
-    descripcion: "Cajita de cartón con diseño navideño y 8 piezas surtidas: brigadeiros y galletas de chocolate, limón y mantequilla con mermelada. Ideal para compartir en la oficina, con la familia o con los vecinos.",
+    nombre: "Caja navideña",
+    descripcion: "Caja de cartón con diseño navideño y 8 piezas surtidas: brigadeiros y galletas de chocolate, limón y mantequilla con mermelada. Ideal para compartir en la oficina, con la familia o con los vecinos.",
     precio: 4950,
     galletas: 8,
     unidad: "piezas",      // incluye brigadeiros, no solo galletas
@@ -168,8 +168,8 @@ const PRODUCTOS = [
   },
   {
     id: "latita",
-    nombre: "Latita navideña",
-    descripcion: "Latita metálica decorada, reutilizable y lista para regalar, con 12 piezas surtidas: brigadeiros y galletas de chocolate, limón y mantequilla con mermelada. Nuestra presentación más especial.",
+    nombre: "Caja metálica",
+    descripcion: "Caja metálica decorada, reutilizable y lista para regalar, con 12 piezas surtidas: brigadeiros y galletas de chocolate, limón y mantequilla con mermelada. Nuestra presentación más especial.",
     precio: 8600,
     galletas: 12,
     unidad: "piezas",      // incluye brigadeiros, no solo galletas
@@ -376,7 +376,7 @@ function cambiarCantidad(id, nueva) {
   // No dejar subir por encima de lo que queda
   const q = quedanDe(id);
   if (nueva > antes && nueva > q) {
-    avisar(q === 0 ? `${producto.nombre}: agotado.` : `Solo quedan ${q}.`);
+    avisar(q === 0 ? `${producto.nombre}: agotada.` : `Solo quedan ${q}.`);
     return;
   }
   if (nueva === antes) return;
@@ -504,7 +504,7 @@ function htmlCostoEntrega(e) {
 
 function htmlInsigniaExistencias(id) {
   const q = quedanDe(id);
-  if (q === 0) return `<span class="insignia insignia--der insignia--agotado">Agotado</span>`;
+  if (q === 0) return `<span class="insignia insignia--der insignia--agotado">Agotada</span>`;
   if (q <= POCAS_EXISTENCIAS) return `<span class="insignia insignia--der insignia--pocas">¡Quedan ${q}!</span>`;
   return "";
 }
@@ -542,7 +542,7 @@ function htmlControl(id, clave, compacto = false) {
     if (q === 0) {
       return `
         <button type="button" class="btn btn--agregar" disabled>
-          Agotado<span class="visualmente-oculto">: ${nombre}</span>
+          Agotada<span class="visualmente-oculto">: ${nombre}</span>
         </button>`;
     }
     if (enTarjeta) {
@@ -867,7 +867,7 @@ function htmlVistaCarrito(vista) {
       ? `<span class="linea__subtotal linea__subtotal--pendiente">Por confirmar</span>`
       : `<span class="linea__subtotal">${formatoColones(subtotal)}</span>`;
     let nota = "";
-    if (problema === "agotado") nota = `<p class="linea__problema">Agotado: quítalo para continuar.</p>`;
+    if (problema === "agotado") nota = `<p class="linea__problema">Agotada: quítala para continuar.</p>`;
     else if (problema === "excede") nota = `<p class="linea__problema">Solo quedan ${q}: ajusta la cantidad.</p>`;
     else if (cant === q) nota = `<p class="linea__limite">Solo quedan ${q}</p>`;
 

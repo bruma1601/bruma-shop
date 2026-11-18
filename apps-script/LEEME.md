@@ -27,13 +27,13 @@ Cree otra pestaña llamada exactamente **Inventario**. Debe verse así:
 
 | id | Producto | Disponibles | Apartados | Quedan |
 |---|---|---|---|---|
-| bolsita | Bolsita navideña | 20 | | |
-| cajita | Cajita navideña | 15 | | |
-| latita | Latita navideña | 10 | | |
+| bolsita | Bolsa con batidor de globo | 20 | | |
+| cajita | Caja navideña | 15 | | |
+| latita | Caja metálica | 10 | | |
 
 - **Usted solo llena** `id`, `Producto` y `Disponibles` (cuántas va a hacer en total).
 - **Apartados** y **Quedan** los llena el programa solo. No escriba en esas columnas.
-- El `id` tiene que ser igual al encabezado de la pestaña Pedidos (`bolsita`, `cajita`, `latita`).
+- El `id` tiene que ser igual al encabezado de la pestaña Pedidos (`bolsita`, `cajita`, `latita`). La columna **Producto** es solo para usted; el `id` no cambia aunque cambie el nombre.
 - Si hace más galletas, solo suba el número de **Disponibles**.
 
 ## 3. Pegar el programa
@@ -50,7 +50,7 @@ Cree otra pestaña llamada exactamente **Inventario**. Debe verse así:
 2. Presione **Ejecutar**.
 3. La primera vez, Google pide permiso: **Revisar permisos** → elija su cuenta → **Configuración avanzada** → **Ir a (nombre del proyecto)** → **Permitir**. Es normal que diga que la app no está verificada, porque es un programa propio y no de una empresa.
 4. Abajo debe aparecer algo como `{"ok":true,"quedan":{...}}`.
-5. Vuelva a la hoja: en **Pedidos** debe haber una fila nueva con el pedido `GN-PRUEBA-0001`, y en **Inventario** la cajita debe tener 1 apartada.
+5. Vuelva a la hoja: en **Pedidos** debe haber una fila nueva con el pedido `GN-PRUEBA-0001`, y en **Inventario** la fila `cajita` (Caja navideña) debe tener 1 apartada.
 6. **Borre esa fila de prueba**: clic derecho sobre el número de la fila → **Borrar fila**. Las existencias se recalculan solas.
 
 ## 5. Publicar (para que la página lo pueda usar)

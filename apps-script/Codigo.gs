@@ -93,7 +93,7 @@ function probarPedido() {
     pedido: "GN-PRUEBA-0001", nombre: "Prueba", telefono: "50688888888",
     entrega: "domicilio", costoEntrega: 2500, senas: "De la iglesia 200 m norte",
     enlaceMapa: "https://www.google.com/maps?q=9.8471,-84.3143",
-    productos: "1 × Cajita navideña", total: 7500, adelanto: 3750,
+    productos: "1 × Caja navideña", total: 7500, adelanto: 3750,
     notas: "Esto es una prueba", items: { cajita: 1 }
   }) } });
   Logger.log(r.getContent());

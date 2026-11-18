@@ -173,6 +173,15 @@ Las imágenes son `img/noah.webp` y `img/noah.png` (con fondo transparente).
 ### Importante
 
 - **No cambie los `id`** (`bolsita`, `cajita`, `latita`). Deben ser iguales a los de la hoja de Google.
+- El cliente nunca ve los `id`, solo el `nombre`. Por eso los nombres pueden cambiar y los `id` se quedan como están:
+
+  | id interno (no cambia) | Nombre que ve el cliente |
+  |---|---|
+  | `bolsita` | Bolsa con batidor de globo |
+  | `cajita` | Caja navideña |
+  | `latita` | Caja metálica (opción de regalo) |
+
+  Lo mismo pasa con los nombres de archivo de las fotos (por ejemplo `img/latita.jpg`): pueden quedarse así.
 - Respete comas, comillas y llaves. Si la página queda en blanco después de un cambio, probablemente falta una coma o una comilla.
 
 ## Envío del pedido por WhatsApp
