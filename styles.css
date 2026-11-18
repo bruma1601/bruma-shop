@@ -580,7 +580,44 @@ p { margin: 0; }
 }
 .lista-sabores li:last-child { border-bottom: 0; }
 .lista-sabores strong { color: var(--rojo-oscuro); white-space: nowrap; }
-.detalle__accion { margin-top: 6px; }
+/* Pie fijo del detalle: resumen de alérgenos + botón, visible aunque no se baje */
+.detalle__pie {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 6px calc(-1 * var(--gutter)) 0;
+  padding: 10px var(--gutter) 12px;
+  border-top: 1px solid #F1E4D3;
+  background: var(--blanco);
+  box-shadow: 0 -8px 16px -12px rgba(43, 26, 23, .25);
+}
+.detalle__resumen {
+  margin: 0;
+  color: var(--tinta-suave);
+  font-size: .88rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+/* Enlace pequeño "Ver detalles" debajo del selector de la tarjeta */
+.tarjeta__ver {
+  display: block;
+  margin: 6px auto 0;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  background: none;
+  color: var(--rojo-oscuro);
+  font: inherit;
+  font-size: .88rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
 
 /* Duración (detalle) */
 .duracion { display: flex; flex-direction: column; gap: 4px; line-height: 1.5; }
@@ -610,6 +647,13 @@ p { margin: 0; }
 .alergenos__icono { flex: none; width: 20px; height: 20px; }
 .alergenos p { margin: 4px 0 0; }
 .alergenos strong { font-weight: 800; }
+.alergenos .alergenos__nota {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--crema);
+  color: var(--tinta-suave);
+  font-size: .82rem;
+}
 
 /* Condiciones del pedido (ventana) */
 .condiciones { padding: 12px var(--gutter) calc(24px + env(safe-area-inset-bottom)); }
@@ -1562,6 +1606,7 @@ body.con-barra .noah--flotante { bottom: calc(84px + env(safe-area-inset-bottom)
   }
   .hoja--detalle .hoja__cuerpo { max-height: 88vh; }
   .hoja--condiciones { width: min(620px, calc(100% - 48px)); }
+  .detalle__pie { margin: 6px 0 0; padding: 10px 0 12px; box-shadow: 0 -10px 12px -10px rgba(43, 26, 23, .18); }
   .condiciones { padding: 24px 28px 28px; }
   .hoja--detalle .hoja__cuerpo::before { display: none; }
   .detalle {

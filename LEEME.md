@@ -147,7 +147,7 @@ contieneGelatina: false                                    // true = malvaviscos
 - `trazas`: lo que **puede contener** porque todo se prepara en la misma cocina. Sale como "Puede contener trazas de: …". Si se deja vacío (`[]`), esa línea no aparece.
 - `contieneGelatina`: `true` muestra "Las bombas de chocolate llevan malvaviscos con gelatina". `false` la oculta.
 
-Revise siempre estas listas contra las etiquetas de los ingredientes que compre. El aviso general del pie de página está en `index.html`, en `pie__alergenos`.
+Revise siempre estas listas contra las etiquetas de los ingredientes que compre. El aviso general de la cocina ("No podemos ofrecer productos libres de alérgenos") está en dos lugares: en el pie de página (`index.html`, en `pie__alergenos`) y en la caja de alérgenos del detalle (`AVISO_COCINA` en `app.js`). Si cambia uno, cambie el otro.
 
 ### Duración
 

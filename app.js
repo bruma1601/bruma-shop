@@ -519,12 +519,18 @@ function htmlFoto(producto) {
   return `<div class="foto">${vacia}${imagen}${regalo}<span data-existencias="${producto.id}">${htmlInsigniaExistencias(producto.id)}</span></div>`;
 }
 
-/** Botón "Agregar" o selector − cantidad +. `clave` identifica el lugar (para devolver el foco). */
+/**
+ * Botón o selector − cantidad +. `clave` identifica el lugar (para devolver el foco):
+ * - "tarjeta-<id>": sin el producto en el carrito, "Ver y agregar" abre el detalle
+ *   (nadie agrega sin ver sabores y alérgenos); con el producto, selector + "Ver detalles".
+ * - "detalle": "Agregar al pedido" (agrega 1 y cierra) o el selector.
+ */
 function htmlControl(id, clave, compacto = false) {
   const producto = buscarProducto(id);
   const cant = cantidadDe(id);
   const q = quedanDe(id);
   const nombre = escapar(producto.nombre);
+  const enTarjeta = String(clave).startsWith("tarjeta-");
 
   if (cant === 0) {
     if (q === 0) {
@@ -533,12 +539,31 @@ function htmlControl(id, clave, compacto = false) {
           Agotado<span class="visualmente-oculto">: ${nombre}</span>
         </button>`;
     }
+    if (enTarjeta) {
+      return `
+        <button type="button" class="btn btn--agregar" data-abrir="${id}" aria-haspopup="dialog"
+          aria-label="Ver y agregar ${nombre}">
+          <svg aria-hidden="true"><use href="#i-bolsa"/></svg>
+          Ver y agregar
+        </button>`;
+    }
+    if (clave === "detalle") {
+      return `
+        <button type="button" class="btn btn--agregar" data-accion="agregar-detalle" data-id="${id}">
+          <svg aria-hidden="true"><use href="#i-bolsa"/></svg>
+          Agregar al pedido
+        </button>`;
+    }
     return `
       <button type="button" class="btn btn--agregar" data-accion="agregar" data-id="${id}" data-clave="${clave}">
         <svg aria-hidden="true"><use href="#i-bolsa"/></svg>
         Agregar<span class="visualmente-oculto"> ${nombre} al carrito</span>
       </button>`;
   }
+  const verDetalles = enTarjeta
+    ? `<button type="button" class="tarjeta__ver" data-abrir="${id}" aria-haspopup="dialog"
+         aria-label="Ver detalles de ${nombre}">Ver detalles</button>`
+    : "";
 
   const tope = cant >= Math.min(q, MAX_POR_PRODUCTO);
   let nota = "";
@@ -556,7 +581,7 @@ function htmlControl(id, clave, compacto = false) {
       <span class="selector__cant">${cant}<span class="visualmente-oculto"> en el carrito</span></span>
       <button type="button" class="selector__btn selector__btn--mas" data-accion="sumar" data-id="${id}" data-clave="${clave}"
         aria-label="${etiquetaMas}" ${tope ? "disabled" : ""}>+</button>
-    </div>${nota}`;
+    </div>${nota}${verDetalles}`;
 }
 
 function htmlPrecio(p) {
@@ -608,7 +633,17 @@ function htmlAlergenos(p) {
       ${contiene.length ? `<p>Contiene: ${listaNegrita(contiene)}.</p>` : ""}
       ${trazas.length ? `<p>Puede contener trazas de: ${listaNegrita(trazas)}.</p>` : ""}
       ${p.contieneGelatina ? `<p>Las bombas de chocolate llevan malvaviscos con gelatina.</p>` : ""}
+      <p class="alergenos__nota">${AVISO_COCINA}</p>
     </section>`;
+}
+
+/** Aviso general de la cocina (también está en el pie de página de index.html). */
+const AVISO_COCINA = "Todas nuestras galletas se preparan en una cocina donde se usan trigo, huevo, leche, nueces, coco y soya. No podemos ofrecer productos libres de alérgenos.";
+
+/** Resumen corto para el pie fijo del detalle: "Contiene: trigo, huevo, leche, coco". */
+function resumenAlergenos(p) {
+  const lista = (p.alergenos || []).map((a) => a.replace(/\s*\(.*?\)\s*/g, "").trim()).filter(Boolean);
+  return lista.length ? `Contiene: ${lista.join(", ")}` : "";
 }
 
 /** Sección "Duración" del detalle (vacía si no hay datos). */
@@ -621,7 +656,7 @@ function htmlDuracion(p) {
   if (!partes.length) return "";
   return `
     <section class="duracion" aria-labelledby="duracion-titulo">
-      <h3 class="detalle__subtitulo" id="duracion-titulo">Duración</h3>
+      <h3 class="detalle__subtitulo" id="duracion-titulo">Para disfrutarlas</h3>
       ${partes.join("")}
     </section>`;
 }
@@ -645,10 +680,14 @@ function htmlDetalle(p) {
         <p class="detalle__desc">${escapar(p.descripcion)}</p>
         <h3 class="detalle__subtitulo">Sabores incluidos</h3>
         <ul class="lista-sabores">${sabores}</ul>
-        ${htmlDuracion(p)}
         ${htmlAlergenos(p)}
-        <div class="detalle__accion" data-control="${p.id}" data-clave="detalle">
-          ${htmlControl(p.id, "detalle")}
+        ${htmlDuracion(p)}
+        <!-- Pie fijo: resumen de alérgenos + botón, visible sin bajar -->
+        <div class="detalle__pie">
+          ${resumenAlergenos(p) ? `<p class="detalle__resumen" aria-hidden="true">${escapar(resumenAlergenos(p))}</p>` : ""}
+          <div class="detalle__accion" data-control="${p.id}" data-clave="detalle">
+            ${htmlControl(p.id, "detalle")}
+          </div>
         </div>
       </div>
     </div>`;
@@ -966,7 +1005,7 @@ function htmlPasoDatos() {
       <div class="campo">
         <label for="f-notas">Notas <span class="opcional">(opcional)</span></label>
         <textarea id="f-notas" name="notas" rows="2" maxlength="300"
-          placeholder="Ej.: es para regalo, alergia a las nueces, etc.">${escapar(datos.notas)}</textarea>
+          placeholder="Ej.: es para regalo, dedicatoria, horario preferido…">${escapar(datos.notas)}</textarea>
       </div>
 
       <p class="privacidad">Usamos tus datos solo para preparar y entregar tu pedido.</p>
@@ -1509,6 +1548,18 @@ document.addEventListener("click", (e) => {
       if (paso === "datos") { leerFormulario(); irAPaso("carrito"); }
       else if (paso === "resumen") irAPaso("datos");
       break;
+    case "agregar-detalle": {
+      // Desde el detalle: agrega 1, cierra la ventana y avisa
+      cambiarCantidad(id, cantidadDe(id) + 1);
+      if (cantidadDe(id) === 0) break;
+      // El botón de la tarjeta se volvió a pintar: el foco vuelve a su selector
+      const tarjeta = document.querySelector(`[data-tarjeta="${id}"]`);
+      dlgDetalle._origen = tarjeta?.querySelector('[data-accion="sumar"]:not([disabled])')
+        || tarjeta?.querySelector(".tarjeta__ver") || tarjeta?.querySelector(".tarjeta__abrir") || dlgDetalle._origen;
+      cerrarDialogo(dlgDetalle);
+      mostrarToast();
+      break;
+    }
     case "confirmar":
       if (!aceptaCondiciones) {
         errorCondiciones = true;
