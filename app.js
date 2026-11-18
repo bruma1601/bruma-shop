@@ -112,63 +112,76 @@ const CONFIG = {
                   "nueces", la tarjeta dice "Contiene nueces".
    - trazas:      lista de lo que PUEDE CONTENER (misma cocina). [] = no se muestra.
    - contieneGelatina: true = avisa que los malvaviscos llevan gelatina.
+   - duracionDias: cuántos días se conservan bien. Se muestra en el detalle.
+   - conservacion: (opcional) cómo guardarlas. null = no se muestra.
+   - modoDeUso:    (opcional) cómo prepararlas o servirlas. null = no se muestra.
    ========================================================= */
 const PRODUCTOS = [
   {
     id: "bolsita",
     nombre: "Bolsita con batidor de globo",
-    // EJEMPLO: cambiar
-    descripcion: "Bolsita navideña con bombas de chocolate y un batidor de globo pequeño de regalo. Se ponen en leche caliente y se baten para un chocolate delicioso.",
-    precio: null,
-    galletas: 5,
+    descripcion: "Bolsita navideña con 3 bombas de chocolate y un batidor de globo pequeño de regalo. Se ponen en leche caliente y se baten para un chocolate delicioso.",
+    precio: 3250,
+    galletas: 3,
     unidad: "bombas de chocolate",
     sabores: [
-      { nombre: "Bombas de chocolate", cantidad: 5 }
+      { nombre: "Bombas de chocolate", cantidad: 3 }
     ],
     foto: "",              // ej.: "img/bolsita.jpg"
     regalo: false,
     // Revisar contra las etiquetas de los ingredientes
     alergenos: ["leche", "soya"],
-    trazas: ["trigo", "huevo", "nueces"],
-    contieneGelatina: true   // malvaviscos
+    trazas: ["trigo", "huevo", "nueces", "coco"],
+    contieneGelatina: true,  // malvaviscos
+    duracionDias: 21,
+    conservacion: null,
+    modoDeUso: null
   },
   {
     id: "cajita",
     nombre: "Cajita navideña de cartón",
-    // EJEMPLO: cambiar
-    descripcion: "Cajita de cartón con diseño navideño, ideal para compartir en la oficina, con la familia o con los vecinos.",
-    precio: null,
-    galletas: 6,
+    descripcion: "Cajita de cartón con diseño navideño y 8 piezas surtidas: brigadeiros y galletas de chocolate, limón y mantequilla con mermelada. Ideal para compartir en la oficina, con la familia o con los vecinos.",
+    precio: 4950,
+    galletas: 8,
+    unidad: "piezas",      // incluye brigadeiros, no solo galletas
     sabores: [
-      { nombre: "Brownie", cantidad: 2 },
-      { nombre: "Mantequilla", cantidad: 2 },
-      { nombre: "Bombas de chocolate", cantidad: 2 }
+      { nombre: "Brigadeiros", cantidad: 2 },
+      { nombre: "Chocolate", cantidad: 2 },
+      { nombre: "Limón", cantidad: 2 },
+      { nombre: "Mantequilla con mermelada", cantidad: 2 }
     ],
     foto: "",              // ej.: "img/cajita.jpg"
     regalo: false,
     // Revisar contra las etiquetas de los ingredientes
-    alergenos: ["trigo (gluten)", "huevo", "leche", "nueces", "soya"],
-    trazas: [],
-    contieneGelatina: true   // malvaviscos
+    alergenos: ["trigo (gluten)", "huevo", "leche", "coco"],
+    trazas: ["nueces", "soya"],
+    contieneGelatina: false,
+    duracionDias: 4,
+    conservacion: "Guárdalas en un recipiente bien cerrado, en un lugar fresco y lejos del sol. Disfruta primero los brigadeiros.",
+    modoDeUso: null
   },
   {
     id: "latita",
     nombre: "Latita navideña",
-    // EJEMPLO: cambiar
-    descripcion: "Latita metálica decorada, reutilizable y lista para regalar. Nuestra presentación más especial.",
-    precio: null,
+    descripcion: "Latita metálica decorada, reutilizable y lista para regalar, con 12 piezas surtidas: brigadeiros y galletas de chocolate, limón y mantequilla con mermelada. Nuestra presentación más especial.",
+    precio: 8600,
     galletas: 12,
-    sabores: [             // EJEMPLO: cambiar
-      { nombre: "Brownie", cantidad: 4 },
-      { nombre: "Mantequilla", cantidad: 4 },
-      { nombre: "Bombas de chocolate", cantidad: 4 }
+    unidad: "piezas",      // incluye brigadeiros, no solo galletas
+    sabores: [
+      { nombre: "Brigadeiros", cantidad: 3 },
+      { nombre: "Chocolate", cantidad: 3 },
+      { nombre: "Limón", cantidad: 3 },
+      { nombre: "Mantequilla con mermelada", cantidad: 3 }
     ],
     foto: "",              // ej.: "img/latita.jpg"
     regalo: true,
     // Revisar contra las etiquetas de los ingredientes
-    alergenos: ["trigo (gluten)", "huevo", "leche", "nueces", "soya"],
-    trazas: [],
-    contieneGelatina: true   // malvaviscos
+    alergenos: ["trigo (gluten)", "huevo", "leche", "coco"],
+    trazas: ["nueces", "soya"],
+    contieneGelatina: false,
+    duracionDias: 4,
+    conservacion: "Guárdalas en un recipiente bien cerrado, en un lugar fresco y lejos del sol. Disfruta primero los brigadeiros.",
+    modoDeUso: null
   }
 ];
 
@@ -230,7 +243,7 @@ function textoContenido(p) {
 
 /** Ícono del espacio sin foto: galleta o taza (bombas de chocolate). */
 function iconoDe(p) {
-  return /galleta/i.test(unidadDe(p)) ? "#i-galleta" : "#i-taza";
+  return /bomba/i.test(unidadDe(p)) ? "#i-taza" : "#i-galleta";
 }
 
 function buscarProducto(id) {
@@ -598,6 +611,21 @@ function htmlAlergenos(p) {
     </section>`;
 }
 
+/** Sección "Duración" del detalle (vacía si no hay datos). */
+function htmlDuracion(p) {
+  const dias = Number(p.duracionDias);
+  const partes = [];
+  if (dias > 0) partes.push(`<p>Se conservan bien hasta <strong>${dias} ${dias === 1 ? "día" : "días"}</strong>.</p>`);
+  if (p.conservacion) partes.push(`<p>${escapar(p.conservacion)}</p>`);
+  if (p.modoDeUso) partes.push(`<p>${escapar(p.modoDeUso)}</p>`);
+  if (!partes.length) return "";
+  return `
+    <section class="duracion" aria-labelledby="duracion-titulo">
+      <h3 class="detalle__subtitulo" id="duracion-titulo">Duración</h3>
+      ${partes.join("")}
+    </section>`;
+}
+
 function htmlDetalle(p) {
   const sabores = p.sabores
     .map((s) => `<li><span>${escapar(s.nombre)}</span><strong>${s.cantidad}</strong></li>`)
@@ -617,6 +645,7 @@ function htmlDetalle(p) {
         <p class="detalle__desc">${escapar(p.descripcion)}</p>
         <h3 class="detalle__subtitulo">Sabores incluidos</h3>
         <ul class="lista-sabores">${sabores}</ul>
+        ${htmlDuracion(p)}
         ${htmlAlergenos(p)}
         <div class="detalle__accion" data-control="${p.id}" data-clave="detalle">
           ${htmlControl(p.id, "detalle")}

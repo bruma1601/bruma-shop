@@ -582,6 +582,11 @@ p { margin: 0; }
 .lista-sabores strong { color: var(--rojo-oscuro); white-space: nowrap; }
 .detalle__accion { margin-top: 6px; }
 
+/* Duración (detalle) */
+.duracion { display: flex; flex-direction: column; gap: 4px; line-height: 1.5; }
+.duracion .detalle__subtitulo { margin-bottom: 2px; }
+.duracion p { margin: 0; color: var(--tinta); }
+
 /* Alérgenos (detalle) */
 .alergenos {
   padding: 12px 14px;

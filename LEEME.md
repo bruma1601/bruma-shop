@@ -138,9 +138,9 @@ El porcentaje del adelanto sale de `porcentajeAdelanto`. Si se quiere cambiar la
 Cada producto en `PRODUCTOS` tiene tres datos de alérgenos. Se muestran en una caja "Alérgenos" de la ventana de detalle:
 
 ```js
-alergenos: ["trigo (gluten)", "huevo", "leche", "nueces", "soya"],   // lo que CONTIENE
-trazas: [],                                                         // lo que PUEDE CONTENER
-contieneGelatina: true                                              // malvaviscos con gelatina
+alergenos: ["trigo (gluten)", "huevo", "leche", "coco"],   // lo que CONTIENE
+trazas: ["nueces", "soya"],                                // lo que PUEDE CONTENER
+contieneGelatina: false                                    // true = malvaviscos con gelatina
 ```
 
 - `alergenos`: lo que el producto **contiene**. Se escribe cada cosa entre comillas, separada por comas. Si la lista incluye `"nueces"` (escrito así, en minúscula), la tarjeta muestra la línea "Contiene nueces".
@@ -148,6 +148,13 @@ contieneGelatina: true                                              // malvavisc
 - `contieneGelatina`: `true` muestra "Las bombas de chocolate llevan malvaviscos con gelatina". `false` la oculta.
 
 Revise siempre estas listas contra las etiquetas de los ingredientes que compre. El aviso general del pie de página está en `index.html`, en `pie__alergenos`.
+
+### Duración
+
+En cada producto, `duracionDias` dice cuántos días se conservan bien. En el detalle sale "Se conservan bien hasta N días".
+
+- `conservacion`: cómo guardarlas (por ejemplo, en un recipiente bien cerrado). `null` = no se muestra.
+- `modoDeUso`: cómo prepararlas o servirlas. `null` = no se muestra.
 
 ### Noah, la perrita mascota
 
