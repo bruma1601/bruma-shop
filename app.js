@@ -112,7 +112,10 @@ const CONFIG = {
    - galletas:    cuántas unidades trae.
    - unidad:      (opcional) qué trae, en plural. Si no se pone, dice "galletas".
    - sabores:     lista fija de { nombre, cantidad }. El cliente no los elige.
-   - foto:        ruta de la imagen (ej.: "img/bolsita.jpg"). "" = "Foto próximamente".
+   - foto:        ruta de la imagen, WebP 1200×900 (ej.: "img/bolsa.webp"). "" = "Foto próximamente".
+   - fotoRespaldo: (opcional) la misma foto en .jpg, para navegadores que no muestran WebP.
+   - fotoAlt:     (opcional) descripción de la foto para lectores de pantalla. Si no se pone, se usa el nombre.
+   - notaFoto:    (opcional) texto pequeño debajo de la foto en el detalle.
    - regalo:      true = insignia verde "Opción de regalo" y estilo especial.
    - alergenos:   lista de lo que CONTIENE. Se muestra en el detalle; si incluye
                   "nueces", la tarjeta dice "Contiene nueces".
@@ -179,7 +182,10 @@ const PRODUCTOS = [
       { nombre: "Limón", cantidad: 3 },
       { nombre: "Mantequilla con mermelada", cantidad: 3 }
     ],
-    foto: "",              // ej.: "img/latita.jpg"
+    foto: "img/caja-metalica.webp",
+    fotoRespaldo: "img/caja-metalica.jpg",
+    fotoAlt: "Caja metálica con galletas navideñas y brigadeiros de coco",
+    notaFoto: "Imagen ilustrativa. El diseño de la lata puede variar.",
     regalo: true,
     // Revisar contra las etiquetas de los ingredientes
     alergenos: ["trigo (gluten)", "huevo", "leche", "coco"],
@@ -509,7 +515,7 @@ function htmlInsigniaExistencias(id) {
   return "";
 }
 
-function htmlFoto(producto) {
+function htmlFoto(producto, lazy = true) {
   const regalo = producto.regalo
     ? `<span class="insignia"><svg aria-hidden="true"><use href="#i-regalo"/></svg>Opción de regalo</span>`
     : "";
@@ -519,10 +525,20 @@ function htmlFoto(producto) {
       <span>Foto próximamente</span>
     </div>`;
   // La imagen va encima del espacio "Foto próximamente"; si no carga, se quita.
-  const imagen = producto.foto
-    ? `<img src="${escapar(producto.foto)}" alt="${escapar(producto.nombre)}" loading="lazy" onerror="this.remove()">`
-    : "";
+  const imagen = htmlImagen(producto, { lazy, alt: producto.fotoAlt || producto.nombre });
   return `<div class="foto">${vacia}${imagen}${regalo}<span data-existencias="${producto.id}">${htmlInsigniaExistencias(producto.id)}</span></div>`;
+}
+
+/**
+ * <img> (o <picture> con WebP + respaldo .jpg) de un producto. "" si no tiene foto.
+ * Si el archivo no carga, se quita y queda visible lo que está debajo ("Foto próximamente" o el ícono).
+ */
+function htmlImagen(producto, { lazy = true, alt = "" } = {}) {
+  if (!producto.foto) return "";
+  const quitar = `onerror="(this.closest('picture')||this).remove()"`;
+  const atributos = `alt="${escapar(alt)}" width="1200" height="900" decoding="async"${lazy ? ' loading="lazy"' : ""} ${quitar}`;
+  if (!producto.fotoRespaldo) return `<img src="${escapar(producto.foto)}" ${atributos}>`;
+  return `<picture><source srcset="${escapar(producto.foto)}" type="image/webp"><img src="${escapar(producto.fotoRespaldo)}" ${atributos}></picture>`;
 }
 
 /**
@@ -596,11 +612,11 @@ function htmlPrecio(p) {
     : `<span class="precio">${formatoColones(p.precio)}</span>`;
 }
 
-function htmlTarjeta(p) {
+function htmlTarjeta(p, indice = 0) {
   const sabores = p.sabores.map((s) => `<li>${s.cantidad} ${escapar(s.nombre)}</li>`).join("");
   return `
     <article class="tarjeta${p.regalo ? " tarjeta--regalo" : ""}" data-tarjeta="${p.id}">
-      ${htmlFoto(p)}
+      ${htmlFoto(p, indice > 0)}
       <div class="tarjeta__info">
         <h3 class="tarjeta__nombre">
           <button type="button" class="tarjeta__abrir" data-abrir="${p.id}" aria-haspopup="dialog">
@@ -676,7 +692,10 @@ function htmlDetalle(p) {
       <button type="button" class="btn-icono detalle__cerrar" data-cerrar aria-label="Cerrar detalle">
         <svg aria-hidden="true"><use href="#i-cerrar"/></svg>
       </button>
-      ${htmlFoto(p)}
+      <div class="detalle__media">
+        ${htmlFoto(p, false)}
+        ${p.foto && p.notaFoto ? `<p class="foto__nota">${escapar(p.notaFoto)}</p>` : ""}
+      </div>
       <div class="detalle__info">
         <h2 class="detalle__nombre" id="detalle-nombre">${escapar(p.nombre)}</h2>
         <div class="tarjeta__meta">
@@ -860,9 +879,9 @@ function htmlVistaCarrito(vista) {
     const clave = `${vista}-${p.id}`;
     const q = quedanDe(p.id);
     const problema = problemaDe(p.id);
-    const mini = p.foto
-      ? `<img src="${escapar(p.foto)}" alt="" onerror="this.remove()">`
-      : `<svg aria-hidden="true"><use href="${iconoDe(p)}"/></svg>`;
+    // El ícono queda debajo de la foto: si la foto no carga, se ve el ícono.
+    // alt="" porque el nombre ya está escrito al lado.
+    const mini = `<svg aria-hidden="true"><use href="${iconoDe(p)}"/></svg>${htmlImagen(p, { lazy: true })}`;
     const sub = subtotal == null
       ? `<span class="linea__subtotal linea__subtotal--pendiente">Por confirmar</span>`
       : `<span class="linea__subtotal">${formatoColones(subtotal)}</span>`;

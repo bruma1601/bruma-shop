@@ -49,15 +49,26 @@ Cambie también `galletas` (cuántas trae en total) para que coincida.
 
 ### Fotos
 
-1. Copie la foto a la carpeta `img/`. Un nombre corto, sin espacios ni tildes, por ejemplo `latita.jpg`.
-2. En el producto, escriba la ruta:
+**Formato recomendado:** WebP de **1200 × 900 px** (proporción **4:3**, apaisada) y **menos de 300 KB**. Es la misma forma del recuadro de la tarjeta y del detalle, así que la foto no se recorta ni se deforma. Si tiene otra proporción, se recorta por los bordes, dejando el centro.
+
+1. Copie la foto a la carpeta `img/`. Use un nombre corto, sin espacios, tildes ni ñ, por ejemplo `caja-metalica.webp`.
+2. En el producto (`PRODUCTOS`, en `app.js`), escriba la ruta:
 
 ```js
-foto: "img/latita.jpg",
+foto: "img/caja-metalica.webp",
+fotoRespaldo: "img/caja-metalica.jpg",   // opcional
+fotoAlt: "Caja metálica con galletas navideñas y brigadeiros de coco",   // opcional
+notaFoto: "Imagen ilustrativa. El diseño de la lata puede variar.",   // opcional
 ```
 
-Lo ideal son fotos cuadradas o apaisadas, de unos 1200 px de ancho y menos de 300 KB.
-Sin foto (`foto: ""`) se ve un espacio que dice "Foto próximamente".
+- `foto`: la foto principal. Sin foto (`foto: ""`) se ve el recuadro "Foto próximamente".
+- `fotoRespaldo` (opcional): la misma foto en `.jpg`, para los pocos navegadores viejos que no muestran WebP. Si no la tiene, borre la línea.
+- `fotoAlt` (opcional): lo que se ve en la foto, para personas que usan lectores de pantalla. Si no se pone, se usa el nombre del producto.
+- `notaFoto` (opcional): una aclaración en letra pequeña debajo de la foto, solo en el detalle.
+
+Si la ruta está mal escrita o el archivo no está en `img/`, la página vuelve a mostrar "Foto próximamente" en lugar de una imagen rota. Si eso pasa, revise que el nombre sea exactamente igual, incluidas mayúsculas y extensión.
+
+El `id` del producto no tiene que ver con el nombre del archivo: la caja metálica tiene id `latita` y su foto se llama `caja-metalica.webp`.
 
 ### Entrega
 
