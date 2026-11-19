@@ -130,7 +130,7 @@ const PRODUCTOS = [
     id: "bolsita",
     nombre: "Bolsa con batidor de globo",
     descripcion: "Bolsa navideña con 3 bombas de chocolate y un batidor de globo pequeño de regalo. Se ponen en leche caliente y se baten para un chocolate delicioso.",
-    precio: 3250,
+    precio: 4000,
     galletas: 3,
     unidad: "bombas de chocolate",
     sabores: [
@@ -153,7 +153,7 @@ const PRODUCTOS = [
     id: "cajita",
     nombre: "Caja navideña",
     descripcion: "Caja de cartón con diseño navideño y 8 piezas surtidas: brigadeiros y galletas de chocolate, limón y mantequilla con mermelada. Ideal para compartir en la oficina, con la familia o con los vecinos.",
-    precio: 4950,
+    precio: 5000,
     galletas: 8,
     unidad: "piezas",      // incluye brigadeiros, no solo galletas
     sabores: [
@@ -178,15 +178,15 @@ const PRODUCTOS = [
   {
     id: "latita",
     nombre: "Caja metálica",
-    descripcion: "Caja metálica decorada, reutilizable y lista para regalar, con 12 piezas surtidas: brigadeiros y galletas de chocolate, limón y mantequilla con mermelada. Nuestra presentación más especial.",
-    precio: 8600,
-    galletas: 12,
+    descripcion: "Caja metálica decorada, reutilizable y lista para regalar, con 9 piezas surtidas: brigadeiros y galletas de chocolate, limón y mantequilla con mermelada. Nuestra presentación más especial.",
+    precio: 6500,
+    galletas: 9,
     unidad: "piezas",      // incluye brigadeiros, no solo galletas
     sabores: [
       { nombre: "Brigadeiros", cantidad: 3 },
-      { nombre: "Chocolate", cantidad: 3 },
-      { nombre: "Limón", cantidad: 3 },
-      { nombre: "Mantequilla con mermelada", cantidad: 3 }
+      { nombre: "Chocolate", cantidad: 2 },
+      { nombre: "Limón", cantidad: 2 },
+      { nombre: "Mantequilla con mermelada", cantidad: 2 }
     ],
     foto: "img/caja-metalica.webp",
     fotoRespaldo: "img/caja-metalica.jpg",
