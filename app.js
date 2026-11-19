@@ -159,7 +159,10 @@ const PRODUCTOS = [
       { nombre: "Limón", cantidad: 2 },
       { nombre: "Mantequilla con mermelada", cantidad: 2 }
     ],
-    foto: "",              // ej.: "img/cajita.jpg"
+    foto: "img/caja-carton.webp",
+    fotoRespaldo: "img/caja-carton.jpg",
+    fotoAlt: "Caja navideña de cartón con galletas de chocolate, mermelada, limón y brigadeiros de coco",
+    notaFoto: "El diseño de la caja puede variar.",
     regalo: false,
     // Revisar contra las etiquetas de los ingredientes
     alergenos: ["trigo (gluten)", "huevo", "leche", "coco"],
