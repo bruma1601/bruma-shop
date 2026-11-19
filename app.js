@@ -130,7 +130,7 @@ const PRODUCTOS = [
     id: "bolsita",
     nombre: "Bolsa con batidor de globo",
     descripcion: "Bolsa navideña con 3 bombas de chocolate y un batidor de globo pequeño de regalo. Se ponen en leche caliente y se baten para un chocolate delicioso.",
-    precio: 4000,
+    precio: 5000,
     galletas: 3,
     unidad: "bombas de chocolate",
     sabores: [
