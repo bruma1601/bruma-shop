@@ -136,7 +136,10 @@ const PRODUCTOS = [
     sabores: [
       { nombre: "Bombas de chocolate", cantidad: 3 }
     ],
-    foto: "",              // ej.: "img/bolsita.jpg"
+    foto: "img/bolsa.webp",
+    fotoRespaldo: "img/bolsa.jpg",
+    fotoAlt: "Tres bombas de chocolate decoradas con acebo y un batidor de globo rojo",
+    notaFoto: "La bolsa no aparece en la foto.",
     regalo: false,
     // Revisar contra las etiquetas de los ingredientes
     alergenos: ["leche", "soya"],
