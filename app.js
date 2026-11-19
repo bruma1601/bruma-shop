@@ -21,7 +21,7 @@ const CONFIG = {
   // (pie de página y paso "Revisa tu pedido"). El texto se arma solo con estos datos.
   condiciones: {
     horasParaPagar: 24,          // si no llega el adelanto en este tiempo, el pedido se cancela
-    adelantoReembolsable: false, // false: las masas se preparan y congelan con anticipación
+    adelantoReembolsable: false, // false: las masas se preparan con anticipación
     diasParaRecoger: 3,          // pedidos no recogidos en estos días no se reembolsan
     saldoFormas: "efectivo o SINPE Móvil",   // cómo se paga el resto
     extra: []                    // líneas adicionales, ej.: ["Los precios incluyen el empaque."]
@@ -728,7 +728,7 @@ function textoCondiciones() {
       `Si no lo recibimos en ${c.horasParaPagar} horas, el pedido se cancela.`
   ];
   if (!c.adelantoReembolsable) {
-    lineas.push("El adelanto no es reembolsable: preparamos y congelamos las masas con anticipación para cada pedido. " +
+    lineas.push("El adelanto no es reembolsable: preparamos las masas con anticipación para cada pedido. " +
       "Si cancelas, no se cobra el resto.");
   }
   lineas.push(
